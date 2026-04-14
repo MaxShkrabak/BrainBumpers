@@ -26,16 +26,16 @@ public class MyGame extends VariableFrameRateGame {
     private RotationController khafreRc, khufuRc, menkaureRc;
     private JumpController houseJc;
 
-    private GameObject dol, saddle, house, floor;
+    private GameObject dol, saddle, house, floor, frontTire;
     private GameObject pyramidKhafre, pyramidKhufu, pyramidMenkaure;
     private GameObject photo1, photo2, photo3;
     private GameObject x, y, z; // world axes
     private GameObject[] pyramids, photos;
 
-    private ObjShape dolS, saddleS, planeS, houseS, pyramidS, floorS;
+    private ObjShape dolS, saddleS, planeS, houseS, pyramidS, floorS, frontTireS;
     private ObjShape linxS, linyS, linzS;
 
-    private TextureImage doltx, saddlet, brick, floorT, khafreT, khufuT;
+    private TextureImage doltx, saddlet, brick, floorT, khafreT, khufuT, frontTireT;
     private TextureImage[] pyramidTextures;
 
     private Light light1, khafreLight, khufuLight, menkaureLight;
@@ -72,6 +72,7 @@ public class MyGame extends VariableFrameRateGame {
     public void loadShapes() {
         dolS = new ImportedModel("Car.obj");
         saddleS = new ImportedModel("Tire.obj");
+        frontTireS = new ImportedModel("FrontTire.obj");
         houseS = new DolphinHouse();
 
         pyramidS = new ManualPyramid();
@@ -115,6 +116,7 @@ public class MyGame extends VariableFrameRateGame {
         // spawns dolphin in the center of the window just above the floor
         dol = spawnObject(GameObject.root(), dolS, doltx, 0f, 1f, 0f, 3.0f, 135.0f);
         saddle = spawnObject(dol, saddleS, saddlet, 0f, 0f, 0f, 1f, 0f);
+        frontTire = spawnObject(dol, frontTireS, saddlet, 0f, 0f, 0f, 1f, 0f);
 
         // spawn dolphins home
         house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
