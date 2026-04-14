@@ -23,8 +23,9 @@ public class TurnAction extends AbstractInputAction {
 
         av = game.getAvatar();
         av.globalYaw(angle);
-        if (!game.isMovSafe(av.getWorldLocation())) {
-            av.globalYaw(-angle);
-        }
+
+        //if (!game.isMovSafe(av.getWorldLocation())) {
+        //    av.globalYaw(-angle);
+        //}
     }
 }

@@ -23,27 +23,23 @@ public class MyGame extends VariableFrameRateGame {
     private CameraOrbit3D orbitController;
     private ViewportController viewportController;
 
-    private RotationController khafreRc, khufuRc, menkaureRc;
-    private JumpController houseJc;
+    private RotationController rc;
+    private JumpController jc;
 
-    private GameObject dol, saddle, house, floor, frontTire;
-    private GameObject pyramidKhafre, pyramidKhufu, pyramidMenkaure;
-    private GameObject photo1, photo2, photo3;
+    private GameObject avatar, backTire, frontLeftTire, frontRightTire, zombie, house, floor;
     private GameObject x, y, z; // world axes
-    private GameObject[] pyramids, photos;
 
-    private ObjShape dolS, saddleS, planeS, houseS, pyramidS, floorS, frontTireS;
+    private ObjShape avatarS, backTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS;
     private ObjShape linxS, linyS, linzS;
 
-    private TextureImage doltx, saddlet, brick, floorT, khafreT, khufuT, frontTireT;
+    private TextureImage avatarT, tireT, zombieT, brick, floorT;
     private TextureImage[] pyramidTextures;
 
     private Light light1, khafreLight, khufuLight, menkaureLight;
 
     private int score = 0;
     private double lastFrameTime, currFrameTime, elapsTime;
-    private boolean canTransfer = false, isGameOver = false, isGameWon = false, showAxes = false;
-    private boolean[] isPhotoTaken = {false, false, false};
+    private boolean isGameOver = false, isGameWon = false, showAxes = false;
     private static final int FLOOR_TEXTURE_TILE = 20;
 
     private String actionMsg = "";
@@ -55,6 +51,8 @@ public class MyGame extends VariableFrameRateGame {
     private float prevMouseX, prevMouseY;
     private boolean isRecentering;
     private boolean mouseModeInitiated = false;
+
+    private int lakeIslands;
 
     public MyGame() {
         super();
@@ -69,14 +67,22 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     @Override
+    public void loadSkyBoxes()
+    {	lakeIslands = (engine.getSceneGraph()).loadCubeMap("lakeIslands");
+        (engine.getSceneGraph()).setActiveSkyBoxTexture(lakeIslands);
+        (engine.getSceneGraph()).setSkyBoxEnabled(true);
+    }
+
+    @Override
     public void loadShapes() {
-        dolS = new ImportedModel("Car.obj");
-        saddleS = new ImportedModel("Tire.obj");
-        frontTireS = new ImportedModel("FrontTire.obj");
+        avatarS = new ImportedModel("Car.obj");
+        backTireS = new ImportedModel("Tire.obj");
+        frontLeftTireS = new ImportedModel("FrontRightTire1.obj");
+        frontRightTireS = new ImportedModel("FrontRightTire2.obj");
+        zombieS = new ImportedModel("Zombie.obj");
+
         houseS = new DolphinHouse();
 
-        pyramidS = new ManualPyramid();
-        planeS = new Plane(); // for pictures
         floorS = new Plane();
 
         // world axes
@@ -87,13 +93,12 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadTextures() {
-        doltx = new TextureImage("CarTexture.png");
-        saddlet = new TextureImage("TireTexture.png");
+        avatarT = new TextureImage("CarTexture.png");
+        tireT = new TextureImage("TireTexture.png");
+        zombieT = new TextureImage("ZombieTexture.png");
 
-        khafreT = new TextureImage("khafreTexture.jpg");
         brick = new TextureImage("brick1.jpg");
-        khufuT = new TextureImage("khufuTexture.png");
-        pyramidTextures = new TextureImage[]{khafreT, khufuT, brick};
+        pyramidTextures = new TextureImage[]{brick};
 
         floorT = new TextureImage("desert.jpg");
     }
@@ -113,33 +118,14 @@ public class MyGame extends VariableFrameRateGame {
         floor.getRenderStates().setTiling(1);
         floor.getRenderStates().setTileFactor(FLOOR_TEXTURE_TILE);
 
-        // spawns dolphin in the center of the window just above the floor
-        dol = spawnObject(GameObject.root(), dolS, doltx, 0f, 1f, 0f, 3.0f, 135.0f);
-        saddle = spawnObject(dol, saddleS, saddlet, 0f, 0f, 0f, 1f, 0f);
-        frontTire = spawnObject(dol, frontTireS, saddlet, 0f, 0f, 0f, 1f, 0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0.65f, 0f, 3.0f, 0.0f);
+        backTire = spawnObject(avatar, backTireS, tireT, 0f, 0f, 0f, 1f, 0f);
+        //frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.19f, -0.1f, 0.8f, 1f, 0f);
+        //frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
+        zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 1.0f, 270.0f);
 
-        // spawn dolphins home
+        // spawn home
         house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
-
-        // spawn three pyramids
-        pyramidKhafre = spawnObject(GameObject.root(), pyramidS, khafreT, 70f, 13.01f, 65f, 13f, 0f);
-        pyramidKhufu = spawnObject(GameObject.root(), pyramidS, khufuT, -15f, 18.01f, -75f, 18f, 0f);
-        pyramidMenkaure = spawnObject(GameObject.root(), pyramidS, brick, -55f, 8.01f, 35f, 8f, 0f);
-        pyramids = new GameObject[]{pyramidKhafre, pyramidKhufu, pyramidMenkaure};
-
-        // spawn three pyramid photos
-        photo1 = initPhoto();
-        photo2 = initPhoto();
-        photo3 = initPhoto();
-        photos = new GameObject[]{photo1, photo2, photo3};
-    }
-
-    // helper for initializing photo objects
-    private GameObject initPhoto() {
-        GameObject photo = spawnObject(dol, planeS, null, 0, 0f, 0f, 0.025f, 0f);
-        photo.setLocalRotation(new Matrix4f().rotationX(235.0f));
-        photo.getRenderStates().disableRendering();
-        return photo;
     }
 
     @Override
@@ -177,20 +163,13 @@ public class MyGame extends VariableFrameRateGame {
         controlActions();
 
         // rotation controller
-        khafreRc = new RotationController(engine, new Vector3f(0, 1, 0), 0.001f);
-        khufuRc = new RotationController(engine, new Vector3f(0, 1, 0), 0.001f);
-        menkaureRc = new RotationController(engine, new Vector3f(0, 1, 0), 0.001f);
-        khafreRc.addTarget(pyramidKhafre);
-        khufuRc.addTarget(pyramidKhufu);
-        menkaureRc.addTarget(pyramidMenkaure);
-        (engine.getSceneGraph()).addNodeController(khafreRc);
-        (engine.getSceneGraph()).addNodeController(khufuRc);
-        (engine.getSceneGraph()).addNodeController(menkaureRc);
+        rc = new RotationController(engine, new Vector3f(0, 1, 0), 0.001f);
+        (engine.getSceneGraph()).addNodeController(rc);
 
         // jump controller
-        houseJc = new JumpController(engine);
-        houseJc.addTarget(house);
-        (engine.getSceneGraph()).addNodeController(houseJc);
+        jc = new JumpController(engine);
+        jc.addTarget(house);
+        (engine.getSceneGraph()).addNodeController(jc);
     }
 
     @Override
@@ -203,29 +182,14 @@ public class MyGame extends VariableFrameRateGame {
     public void update() {
         if (!mouseModeInitiated) initMouseMode();
 
-        if (!isGameOver) {
-            lastFrameTime = currFrameTime;
-            currFrameTime = System.currentTimeMillis();
-            double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
-            elapsTime += moveTime;
+        lastFrameTime = currFrameTime;
+        currFrameTime = System.currentTimeMillis();
+        double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
+        elapsTime += moveTime;
 
-            im.update((float) moveTime);
-            orbitController.updateCameraPosition();
-
-            if (!isGameWon) updatePhotoPositions();
-        }
-
+        im.update((float) moveTime);
+        orbitController.updateCameraPosition();
         updateHud();
-    }
-
-    private void updatePhotoPositions() {
-        Vector3f fwd = dol.getWorldForwardVector();
-        Vector3f up = dol.getWorldUpVector();
-        Vector3f right = dol.getWorldRightVector();
-
-        photo1.setLocalLocation(new Vector3f(up).mul(0.7f).add(new Vector3f(fwd).mul(-1.0f)).add(new Vector3f(right).mul(-0.2f)));
-        photo2.setLocalLocation(new Vector3f(up).mul(0.7f).add(new Vector3f(fwd).mul(-1.0f)).add(new Vector3f(right).mul(0.0f)));
-        photo3.setLocalLocation(new Vector3f(up).mul(0.7f).add(new Vector3f(fwd).mul(-1.0f)).add(new Vector3f(right).mul(0.2f)));
     }
 
     private void updateHud() {
@@ -247,7 +211,7 @@ public class MyGame extends VariableFrameRateGame {
 
         // action message
         if (actionTimer <= elapsTime) {
-            float dist = getPyramidDistance();
+            float dist = 5f; // hard coded needs to be fixed TODO if we do action message
             actionMsg = "Closest pyramid is " + (int) dist + " meters away.";
         }
 
@@ -269,157 +233,11 @@ public class MyGame extends VariableFrameRateGame {
         int vrY = (int) (height * (vr.getRelativeBottom() + vr.getRelativeHeight()) - 30);
 
         // dolphin's world coordinates
-        Vector3f dolLoc = dol.getWorldLocation();
-        int xloc = (int) dolLoc.x;
-        int zloc = (int) dolLoc.z;
-        int yloc = (int) dolLoc.y;
+        Vector3f avatarLoc = avatar.getWorldLocation();
+        int xloc = (int) avatarLoc.x;
+        int zloc = (int) avatarLoc.z;
+        int yloc = (int) avatarLoc.y;
         (engine.getHUDmanager()).setHUD5("X:" + xloc + " Y:" + yloc + " Z:" + zloc, new Vector3f(1, 1, 1), vrX, vrY);
-    }
-
-    // check if player is close enough to a pyramid to take a picture
-    public void takePyramidPicture() {
-        int i = getClosestPyramid();
-        String[] pyramidNames = {"Khafre", "Khufu", "Menkaure"};
-
-        float pyramidDistance = getPyramidDistance();
-
-        float photoRange = 10.0f;
-
-        if (pyramidDistance < photoRange) {
-            if (isPhotoTaken[i]) {
-                displayAction("You already took a picture of " + pyramidNames[i] + "!", 2.0f);
-            } else {
-                isPhotoTaken[i] = true;
-                score++;
-                displayAction("Snap! Picture taken of: " + pyramidNames[i], 2.0f);
-                updatePhotoTexture(i, pyramidTextures[i]);
-
-                RotationController[] rcs = {khafreRc, khufuRc, menkaureRc};
-                rcs[i].enable();
-            }
-        } else {
-            displayAction("Not close enough to " + pyramidNames[i] + " for a photo.", 2.0f);
-        }
-    }
-
-    public void tryTransferPictures() {
-        if (canTransfer && wonGame()) {
-            isGameWon = true;
-            transferPictures();
-            houseJc.enable();
-        } else if (!canTransfer) {
-            displayAction("Get back home to transfer!", 2.0f);
-        } else {
-            displayAction("You need to photograph the 3 pyramids first!", 2.0f);
-        }
-    }
-
-    // transfers pictures into the dolphins house if player got all 3
-    public void transferPictures() {
-        if (score == 3) {
-            for (int i = 0; i < photos.length; i++) {
-                photos[i].setParent(house);
-
-                float xOffset = 1.9f;
-                float yOffset = 0.2f;
-                float zOffset = -1f + (i * 1f);
-
-                photos[i].setLocalLocation(new Vector3f(xOffset, yOffset, zOffset));
-
-                photos[i].setLocalRotation(
-                        new Matrix4f()
-                                .rotationX((float) Math.toRadians(90.0f))
-                                .rotateZ((float) Math.toRadians(90.0f))
-                );
-                photos[i].setLocalScale(new Matrix4f().scaling(0.2f));
-            }
-        }
-    }
-
-    public boolean isMovSafe(Vector3f newPosition) {
-        float length = 2.4f;
-        float width = 0.8f;
-
-        Vector3f fwd = dol.getWorldForwardVector();
-        Vector3f right = dol.getWorldRightVector();
-
-        Vector3f center = new Vector3f(newPosition);
-        Vector3f snout = new Vector3f(fwd).mul(length).add(newPosition);
-        Vector3f tail = new Vector3f(fwd).mul(-length).add(newPosition);
-        Vector3f rightFin = new Vector3f(right).mul(width).add(newPosition);
-        Vector3f leftFin = new Vector3f(right).mul(-width).add(newPosition);
-
-        Vector3f[] dolphinHitbox = {center, snout, tail, rightFin, leftFin};
-
-        for (GameObject pyramid : pyramids) {
-            if (isHitboxColliding(dolphinHitbox, pyramid, 1.0f)) {
-                isGameOver = true;
-                return false;
-            }
-        }
-
-        canTransfer = isHitboxColliding(dolphinHitbox, house, 3.0f);
-        return !isHitboxColliding(dolphinHitbox, house, 1.2f); // move is safe
-    }
-
-    // helper to check if dolphin is colliding with an object
-    private boolean isHitboxColliding(Vector3f[] hitbox, GameObject target, float scaleMultiplier) {
-        Vector3f loc = target.getWorldLocation();
-        float halfWidth = target.getWorldScale().get(0, 0) * scaleMultiplier;
-
-        float minX = loc.x - halfWidth;
-        float maxX = loc.x + halfWidth;
-        float minZ = loc.z - halfWidth;
-        float maxZ = loc.z + halfWidth;
-
-        for (Vector3f point : hitbox) {
-            if (point.x > minX && point.x < maxX && point.z > minZ && point.z < maxZ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // calculate distance between dolphin and pyramid
-    public float getPyramidDistance() {
-        int pyramidIndex = getClosestPyramid();
-        Vector3f dolLoc = dol.getWorldLocation();
-        Vector3f pyrLoc = pyramids[pyramidIndex].getWorldLocation();
-
-        float halfWidth = pyramids[pyramidIndex].getWorldScale().get(0, 0);
-
-        float nearestX = Math.max(pyrLoc.x - halfWidth, Math.min(dolLoc.x, pyrLoc.x + halfWidth));
-        float nearestZ = Math.max(pyrLoc.z - halfWidth, Math.min(dolLoc.z, pyrLoc.z + halfWidth));
-
-        float dx = dolLoc.x - nearestX;
-        float dz = dolLoc.z - nearestZ;
-        float distToEdge = (float) Math.sqrt(dx * dx + dz * dz);
-
-        float dolphinRadius = 2.4f;
-        float surfaceDist = distToEdge - dolphinRadius;
-        if (surfaceDist < 0) surfaceDist = 0;
-
-        return surfaceDist;
-    }
-
-    // helper to get the closest pyramid's index
-    private int getClosestPyramid() {
-        int closestIndex = 0;
-        float minDist = dol.getWorldLocation().distance(pyramids[0].getWorldLocation());
-
-        for (int i = 1; i < pyramids.length; i++) {
-            float dist = dol.getWorldLocation().distance(pyramids[i].getWorldLocation());
-            if (dist < minDist) {
-                minDist = dist;
-                closestIndex = i;
-            }
-        }
-        return closestIndex;
-    }
-
-    private void updatePhotoTexture(int i, TextureImage tex) {
-        photos[i].setTextureImage(tex);
-        photos[i].getRenderStates().enableRendering();
     }
 
     // helper to change action message in hud
@@ -442,20 +260,10 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
-    private boolean wonGame() {
-        return score == 3;
-    }
-
     @Override
     public void keyPressed(KeyEvent e) {
         if (!isGameOver) {
             switch (e.getKeyCode()) {
-                case KeyEvent.VK_SPACE:
-                    tryTransferPictures();
-                    break;
-                case KeyEvent.VK_P:
-                    takePyramidPicture();
-                    break;
                 case KeyEvent.VK_X:
                     toggleAxes();
                     break;
@@ -464,16 +272,30 @@ public class MyGame extends VariableFrameRateGame {
         super.keyPressed(e);
     }
 
+    private int[] returnVPCoords(Viewport vp, float x, float y){
+        int[] newCoords = new int[2];
+        float sWidth = engine.getRenderSystem().getWidth();
+        float sHeight = engine.getRenderSystem().getHeight();
+
+        float left = vp.getRelativeLeft() * sWidth;
+        float bottom = vp.getRelativeBottom() * sHeight + vp.getBorderWidth() + 5f;
+        float width = vp.getRelativeWidth() * sWidth;
+        float height = vp.getRelativeHeight() * sHeight - vp.getBorderWidth() - 40f;
+
+        newCoords[0] = (int)(left + (x * width));
+        newCoords[1] = (int)(bottom + (y * height));
+
+        return newCoords;
+    }
+
     private void controlActions() {
         im = engine.getInputManager();
         String gpName = im.getFirstGamepadName();
         Camera leftCam = viewportController.getLeftCamera();
-        orbitController = new CameraOrbit3D(leftCam, dol, gpName, engine);
+        orbitController = new CameraOrbit3D(leftCam, avatar, gpName, engine);
 
         // gamepad controls
-        GamepadAction takePhotoGamepad = new GamepadAction(this, 'y');
         GamepadAction toggleAxesGamepad = new GamepadAction(this, 'x');
-        GamepadAction transferPicturesGamepad = new GamepadAction(this, 'b');
         MovAction movGamepad = new MovAction(this, -1.0f);
         TurnAction turnGamepad = new TurnAction(this, -1.0f);
 
@@ -486,12 +308,6 @@ public class MyGame extends VariableFrameRateGame {
                 InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllGamepads(
                 net.java.games.input.Component.Identifier.Button._2, toggleAxesGamepad,
-                InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-        im.associateActionWithAllGamepads(
-                net.java.games.input.Component.Identifier.Button._3, takePhotoGamepad,
-                InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-        im.associateActionWithAllGamepads(
-                net.java.games.input.Component.Identifier.Button._1, transferPicturesGamepad,
                 InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
         // keyboard controls
@@ -587,7 +403,8 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {    // if robot is recentering and the MouseEvent location is in the center,
+    public void mouseMoved(MouseEvent e) {
+        // if robot is recentering and the MouseEvent location is in the center,
         // then this event was generated by the robot
         if (mouseModeInitiated) {
             if (isRecentering &&
@@ -637,7 +454,7 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public GameObject getAvatar() {
-        return dol;
+        return avatar;
     }
 
     public Engine getEngine() {

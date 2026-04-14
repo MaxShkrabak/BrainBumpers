@@ -15,14 +15,8 @@ public class GamepadAction extends AbstractInputAction {
     @Override
     public void performAction(float time, Event e) {
 
-        if (button == 'y') {
-            game.takePyramidPicture();
-        }
         if (button == 'x') {
             game.toggleAxes();
-        }
-        if (button == 'b') {
-            game.tryTransferPictures();
         }
     }
 }

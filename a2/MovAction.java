@@ -32,8 +32,6 @@ public class MovAction extends AbstractInputAction {
         newPosition = oldPosition.add(fwdDirection.x(),
                 fwdDirection.y(), fwdDirection.z());
 
-        if (game.isMovSafe(newPosition)) {
-            av.setLocalLocation(newPosition);
-        }
+        av.setLocalLocation(newPosition);
     }
 }
