@@ -34,13 +34,13 @@ public class MyGame extends VariableFrameRateGame {
     private RotationController rc;
     private JumpController jc;
 
-    private GameObject avatar, backTire, frontLeftTire, frontRightTire, zombie, house, floor;
+    private GameObject avatar, backTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
     private GameObject x, y, z; // world axes
 
-    private ObjShape avatarS, ghostS, backTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS;
+    private ObjShape avatarS, ghostS, backTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS, terrS;
     private ObjShape linxS, linyS, linzS;
 
-    private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT;
+    private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT, hills, grass;
     private TextureImage[] pyramidTextures;
 
     private Light light1, khafreLight, khufuLight, menkaureLight;
@@ -123,6 +123,8 @@ public class MyGame extends VariableFrameRateGame {
         linxS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(3f, 0.01f, 0f));
         linyS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(0f, 3.01f, 0f));
         linzS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(0f, 0.01f, -3f));
+
+        terrS = new TerrainPlane(200); // pixels per axis = 200x200
     }
 
     @Override
@@ -136,6 +138,10 @@ public class MyGame extends VariableFrameRateGame {
         pyramidTextures = new TextureImage[]{brick};
 
         floorT = new TextureImage("desert.jpg");
+
+        // Terrain stuff
+        hills = new TextureImage("cityMap.png");
+        grass = new TextureImage("cityTexture.png");
     }
 
     @Override
@@ -148,12 +154,7 @@ public class MyGame extends VariableFrameRateGame {
         (y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
-        // spawns floor surface (desert)
-        floor = spawnObject(GameObject.root(), floorS, floorT, 0f, 0f, 0f, 150.0f, 0f);
-        floor.getRenderStates().setTiling(1);
-        floor.getRenderStates().setTileFactor(FLOOR_TEXTURE_TILE);
-
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0.65f, 0f, 3.0f, 0.0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0f, 0f, 1.0f, 0.0f);
         backTire = spawnObject(avatar, backTireS, tireT, 0f, 0f, 0f, 1f, 0f);
         //frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.19f, -0.1f, 0.8f, 1f, 0f);
         //frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
@@ -161,6 +162,19 @@ public class MyGame extends VariableFrameRateGame {
 
         // spawn home
         house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
+
+        // build terrain object
+        Matrix4f initialTranslation, initialScale;
+        terr = new GameObject(GameObject.root(), terrS, grass);
+        initialTranslation = (new Matrix4f()).translation(0f,0f,0f);
+        terr.setLocalTranslation(initialTranslation);
+        initialScale = (new Matrix4f()).scaling(100.0f, 15.0f, 100.0f);
+        terr.setLocalScale(initialScale);
+        terr.setHeightMap(hills);
+
+        // set tiling for terrain texture
+        terr.getRenderStates().setTiling(1);
+        terr.getRenderStates().setTileFactor(1);
     }
 
     @Override
@@ -229,6 +243,12 @@ public class MyGame extends VariableFrameRateGame {
         im.update((float) moveTime);
         orbitController.updateCameraPosition();
         updateHud();
+
+        // update altitude of dolphin based on height map
+        Vector3f loc = avatar.getWorldLocation();
+        float height = terr.getHeight(loc.x(), loc.z());
+        height += 0.2f;
+        avatar.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
 
         if (isMultiplayerMode) {
             processNetworking((float)moveTime);
