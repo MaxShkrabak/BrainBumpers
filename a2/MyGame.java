@@ -70,8 +70,8 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadShapes() {
-        dolS = new ImportedModel("dolphinHighPoly.obj");
-        saddleS = new ImportedModel("saddle.obj");
+        dolS = new ImportedModel("Car.obj");
+        saddleS = new ImportedModel("Tire.obj");
         houseS = new DolphinHouse();
 
         pyramidS = new ManualPyramid();
@@ -86,8 +86,8 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadTextures() {
-        doltx = new TextureImage("Dolphin_HighPolyUV.jpg");
-        saddlet = new TextureImage("saddleTexture.png");
+        doltx = new TextureImage("CarTexture.png");
+        saddlet = new TextureImage("TireTexture.png");
 
         khafreT = new TextureImage("khafreTexture.jpg");
         brick = new TextureImage("brick1.jpg");
