@@ -47,7 +47,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private int score = 0;
     private double lastFrameTime, currFrameTime, elapsTime;
-    private boolean isGameOver = false, isGameWon = false, showAxes = false;
+    private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false;
     private static final int FLOOR_TEXTURE_TILE = 20;
 
     private String actionMsg = "";
@@ -240,8 +240,11 @@ public class MyGame extends VariableFrameRateGame {
         double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
         elapsTime += moveTime;
 
-        im.update((float) moveTime);
-        orbitController.updateCameraPosition();
+        if(isGameStarted){
+            im.update((float) moveTime);
+            orbitController.updateCameraPosition();
+        }
+
         updateHud();
 
         // update altitude of dolphin based on height map
@@ -274,8 +277,11 @@ public class MyGame extends VariableFrameRateGame {
 
         // action message
         if (actionTimer <= elapsTime) {
-            float dist = 5f; // hard coded needs to be fixed TODO if we do action message
-            actionMsg = "Closest pyramid is " + (int) dist + " meters away.";
+            if (!isGameStarted) {
+                actionMsg = "Game has not yet started!";
+            } else {
+                actionMsg = "Wave 5";
+            }
         }
 
         // main hud
@@ -332,7 +338,7 @@ public class MyGame extends VariableFrameRateGame {
                     break;
                 case KeyEvent.VK_Z:
                     if (isMultiplayerMode) {
-                        if(protClient != null && isClientConnected)
+                        if (protClient != null && isClientConnected)
                         {	protClient.sendByeMessage();
                             setIsConnected(false);
                             shutdown();
@@ -341,6 +347,10 @@ public class MyGame extends VariableFrameRateGame {
                     }
                     break;
                 case KeyEvent.VK_R:
+                    protClient.sendReadyMessage();
+
+                    break;
+                case KeyEvent.VK_T:
                     toggleRecenter();
                     break;
             }
@@ -578,13 +588,19 @@ public class MyGame extends VariableFrameRateGame {
     public void showChatMessage(String msgType){
         switch (msgType) {
             case "joinMsg":
-                displayAction("A Player has joined the game!", 5);
+                displayAction("A Player has joined the game!", 2);
                 break;
             case "byeMsg":
-                displayAction("A Player has left the game!", 5);
+                displayAction("A Player has left the game!", 2);
+                break;
+            case "startMsg":
+                displayAction("The game has been started!", 2);
+                isGameStarted = true;
                 break;
         }
     }
+
+    public void readyPlayerUp(){}
 
     private class SendCloseConnectionPacketAction extends AbstractInputAction
     {	@Override

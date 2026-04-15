@@ -1,12 +1,17 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.UUID;
+import java.util.HashMap;
 
 import tage.networking.server.GameConnectionServer;
 import tage.networking.server.IClientInfo;
 
 public class GameServerUDP extends GameConnectionServer<UUID> 
 {
+	private static final int MIN_PLAYERS = 2;
+	private boolean gameStarted = false;
+	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
+
 	public GameServerUDP(int localPort) throws IOException 
 	{	super(localPort, ProtocolType.UDP);
 	}
@@ -22,12 +27,19 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			// Received Message Format: (join,localId)
 			if(messageTokens[0].compareTo("join") == 0)
 			{	try 
-				{	IClientInfo ci;					
-					ci = getServerSocket().createClientInfo(senderIP, senderPort);
-					UUID clientID = UUID.fromString(messageTokens[1]);
-					addClient(ci, clientID);
+				{	UUID clientID = UUID.fromString(messageTokens[1]);
 					System.out.println("[CLIENT]: Join request received from - " + clientID.toString());
-					sendJoinedMessage(clientID, true);
+
+					if (gameStarted) {
+						sendJoinedMessage(clientID, false);
+					} else {
+						IClientInfo ci;
+						ci = getServerSocket().createClientInfo(senderIP, senderPort);
+						addClient(ci, clientID);
+
+						sendJoinedMessage(clientID, true);
+						readyStatus.put(clientID, false); // Store the connected user in the hashmap
+					}
 				} 
 				catch (IOException e) 
 				{	UUID clientID = UUID.fromString(messageTokens[1]);
@@ -35,7 +47,31 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 					sendJoinedMessage(clientID, false);
 					e.printStackTrace();
 			}	}
-			
+
+			// READY -- Case where clients readies in game
+			// Received Message Format: (ready,localId)
+			if(messageTokens[0].compareTo("ready") == 0)
+			{	if (!gameStarted) {
+					UUID clientID = UUID.fromString(messageTokens[1]);
+					if (!readyStatus.containsKey(clientID)){}
+					System.out.println("[CLIENT]: Ready request received from - " + clientID.toString());
+
+					// Check that the player is not already readied up
+					if (readyStatus.get(clientID) != true) {
+						readyStatus.replace(clientID, false, true); // set ready status to true
+					}
+
+					// Starts the game when all players have connected and readied up
+					if (getClients().size() >= MIN_PLAYERS && !readyStatus.containsValue(false)) {
+						gameStarted = true;
+						System.out.println("[SERVER] All players have readied up, starting game!");
+						startGameMessage();
+					}
+				}
+			}
+
+			// TODO Unready logic
+
 			// BYE -- Case where clients leaves the server
 			// Received Message Format: (bye,localId)
 			if(messageTokens[0].compareTo("bye") == 0)
@@ -43,6 +79,8 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				System.out.println("[CLIENT]: Exit request received from - " + clientID.toString());
 				sendByeMessages(clientID);
 				removeClient(clientID);
+
+				readyStatus.remove(clientID); // remove disconnected player from ready map
 			}
 			
 			// CREATE -- Case where server receives a create message (to specify avatar location)
@@ -125,6 +163,17 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		} 
 		catch (IOException e) 
 		{	e.printStackTrace();
+	}	}
+
+	public void startGameMessage()
+	{	try
+	{	String message = new String("start");
+		sendPacketToAll(message);
+		//Notify all players that game is starting
+		sendPacketToAll("startMsg");
+	}
+	catch (IOException e)
+	{	e.printStackTrace();
 	}	}
 	
 	// Informs a client that a new avatar has joined the server with the unique identifier 

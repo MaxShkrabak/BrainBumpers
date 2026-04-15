@@ -53,6 +53,13 @@ public class ProtocolClient extends GameConnectionClient
 			{	System.out.println("[SERVER]: A Player has joined the game!");
 				game.showChatMessage("joinMsg");
 			}
+
+			// Handle STARTMSG message
+			// Format: (startMsg)
+			if(messageTokens[0].compareTo("startMsg") == 0)
+			{	System.out.println("[SERVER]: The game has been started!");
+				game.showChatMessage("startMsg");
+			}
 			
 			// Handle BYE message
 			// Format: (bye,remoteId)
@@ -164,6 +171,14 @@ public class ProtocolClient extends GameConnectionClient
 		} catch (IOException e) 
 		{	e.printStackTrace();
 	}	}
+
+	public void sendReadyMessage() {
+		try {
+			sendPacket(new String("ready," + id.toString()));
+		} catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 	
 	// Informs the server of the clients Avatars position. The server 
 	// takes this message and forwards it to all other clients registered 
