@@ -10,6 +10,8 @@ public class TurnAction extends AbstractInputAction {
     private float direction;
     private ProtocolClient protClient;
 
+    private static final float TURN_SPEED = 2.0f;
+
     public TurnAction(MyGame g, float d, ProtocolClient pc) {
         game = g;
         direction = d;
@@ -21,16 +23,8 @@ public class TurnAction extends AbstractInputAction {
         float keyValue = e.getValue();
         if (keyValue > -.2 && keyValue < .2) return; // deadzone
 
-        float angle = (3f * direction * keyValue * time);
-
-        av = game.getAvatar();
-        av.globalYaw(angle);
-
-        protClient.sendTurnMessage(angle);
-
-        //if (!game.isMovSafe(av.getWorldLocation())) {
-        //    av.globalYaw(-angle);
-        //}
+        float delta = TURN_SPEED * direction * keyValue * time;
+        game.turn(delta);
     }
 }
 

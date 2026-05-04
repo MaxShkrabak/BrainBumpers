@@ -8,7 +8,7 @@ import tage.networking.server.IClientInfo;
 
 public class GameServerUDP extends GameConnectionServer<UUID> 
 {
-	private static final int MIN_PLAYERS = 2;
+	private static final int MIN_PLAYERS = 1;
 	private boolean gameStarted = false;
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 

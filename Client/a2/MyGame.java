@@ -62,6 +62,8 @@ public class MyGame extends VariableFrameRateGame {
 
     private int lakeIslands;
 
+    private CarController carController;
+
     private boolean isMultiplayerMode;
     private String serverAddress;
     private int serverPort;
@@ -156,8 +158,11 @@ public class MyGame extends VariableFrameRateGame {
 
         avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0f, 0f, 1.0f, 0.0f);
         backTire = spawnObject(avatar, backTireS, tireT, 0f, 0f, 0f, 1f, 0f);
-        //frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.19f, -0.1f, 0.8f, 1f, 0f);
-        //frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.19f, -0.1f, 0.8f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
+        backTire.applyParentRotationToPosition(true);
+        frontLeftTire.applyParentRotationToPosition(true);
+        frontRightTire.applyParentRotationToPosition(true);
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 1.0f, 270.0f);
 
         // spawn home
@@ -213,6 +218,8 @@ public class MyGame extends VariableFrameRateGame {
             setupNetworking();
         }
 
+        carController = new CarController(avatar, frontLeftTire, frontRightTire, protClient, isMultiplayerMode);
+
         controlActions();
 
         // rotation controller
@@ -241,7 +248,10 @@ public class MyGame extends VariableFrameRateGame {
         elapsTime += moveTime;
 
         if(isGameStarted){
+            carController.beginFrame();
             im.update((float) moveTime);
+            carController.update((float) moveTime);
+
             orbitController.updateCameraPosition();
         }
 
@@ -285,13 +295,13 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         // main hud
-        String timer = "Time = " + Math.round((float) elapsTime);
+        String speedHud = "Speed: " + Math.round(Math.abs(carController.getCurrentSpeed())) + " km/h";
         String scoreHud = "Total Score: " + score;
 
         Vector3f timerColor = new Vector3f(1, 1, 0);
         Vector3f scoreColor = new Vector3f(0, 1, 1);
         Vector3f actionColor = new Vector3f(1, 1, 1);
-        (engine.getHUDmanager()).setHUD1(timer, timerColor, 20, height - 80);
+        (engine.getHUDmanager()).setHUD1(speedHud, timerColor, 20, height - 80);
         (engine.getHUDmanager()).setHUD2(scoreHud, scoreColor, 20, height - 40);
         (engine.getHUDmanager()).setHUD3(gameStatusMsg, statusColor, width / 2, height - 50); // top middle of window
         (engine.getHUDmanager()).setHUD4(actionMsg, actionColor, 20, height - 120);
@@ -610,5 +620,9 @@ public class MyGame extends VariableFrameRateGame {
     }
     }
     }
+
+    public void setThrottle(float input) { carController.setThrottle(input); }
+    public void turn(float delta) { carController.turn(delta); }
+
 }
 
