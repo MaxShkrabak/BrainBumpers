@@ -5,11 +5,12 @@ import tage.GameObject;
 import org.joml.*;
 
 public class CarController {
-    private GameObject avatar, frontLeftTire, frontRightTire;
+    private GameObject avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire;
     private ProtocolClient protClient;
     private boolean isMultiplayer;
 
     private float wheelAngle = 0f;
+    private float rollAngle = 0f;
     private float currentSpeed = 0f;
     private float throttle = 0f;
     private boolean turnKeyHeld = false;
@@ -19,11 +20,14 @@ public class CarController {
     private static final float MAX_SPEED = 14f;
     private static final float ACCELERATION = 10f;
     private static final float DECELERATION = 14f;
+    private static final float WHEEL_RADIUS = 0.3f;
 
-    public CarController(GameObject avatar, GameObject frontLeftTire, GameObject frontRightTire, ProtocolClient protClient, boolean isMultiplayer) {
+    public CarController(GameObject avatar, GameObject frontLeftTire, GameObject frontRightTire, GameObject backLeftTire, GameObject backRightTire, ProtocolClient protClient, boolean isMultiplayer) {
         this.avatar = avatar;
         this.frontLeftTire = frontLeftTire;
         this.frontRightTire = frontRightTire;
+        this.backLeftTire = backLeftTire;
+        this.backRightTire = backRightTire;
         this.protClient = protClient;
         this.isMultiplayer = isMultiplayer;
     }
@@ -40,7 +44,7 @@ public class CarController {
         if (wheelAngle > MAX_WHEEL_ANGLE) wheelAngle = MAX_WHEEL_ANGLE;
         if (wheelAngle < -MAX_WHEEL_ANGLE) wheelAngle = -MAX_WHEEL_ANGLE;
         turnKeyHeld = true;
-        updateFrontTires();
+        updateAllTires();
     }
 
     public void update(float dt) {
@@ -60,7 +64,7 @@ public class CarController {
         if (currentSpeed != 0f) {
             // turning is less sharp at high speed
             float tightness = 1f - (Math.abs(currentSpeed) / MAX_SPEED) * 0.7f;
-            float turnAmount = currentSpeed * (float) org.joml.Math.sin(wheelAngle * tightness) * dt;
+            float turnAmount = currentSpeed * Math.sin(wheelAngle * tightness) * dt;
             if (turnAmount != 0f) {
                 avatar.globalYaw(turnAmount);
                 if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount);
@@ -74,26 +78,32 @@ public class CarController {
             if (isMultiplayer && protClient != null) protClient.sendMoveMessage(avatar.getWorldLocation());
         }
 
+        // spin tires based on speed
+        rollAngle += currentSpeed * dt / WHEEL_RADIUS;
+
         // wheels will return to center when not actively turning
         if (!turnKeyHeld && wheelAngle != 0f) {
             float step = WHEEL_RETURN_SPEED * dt;
             if (Math.abs(wheelAngle) <= step) wheelAngle = 0f;
             else wheelAngle -= Math.signum(wheelAngle) * step;
-            updateFrontTires();
         }
+
+        updateAllTires();
     }
 
-    private void updateFrontTires() {
-        rotateTire(frontLeftTire);
-        rotateTire(frontRightTire);
+    private void updateAllTires() {
+        applyTireRotation(frontLeftTire, wheelAngle);
+        applyTireRotation(frontRightTire, wheelAngle);
+        applyTireRotation(backLeftTire, 0f);
+        applyTireRotation(backRightTire, 0f);
     }
 
-    private void rotateTire(GameObject tire) {
+    private void applyTireRotation(GameObject tire, float steer) {
         if (tire == null) return;
         Vector3f t = new Vector3f();
         tire.getLocalTranslation().getTranslation(t);
         Vector3f s = tire.getLocalScale().getScale(new Vector3f());
-        Matrix4f rot = new Matrix4f().rotationY(wheelAngle);
+        Matrix4f rot = new Matrix4f().rotationY(steer).rotateX(rollAngle);
         tire.setLocalRotation(rot);
         tire.setLocalTranslation(new Matrix4f().translation(t));
         tire.setLocalScale(new Matrix4f().scaling(s));

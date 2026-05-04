@@ -34,10 +34,10 @@ public class MyGame extends VariableFrameRateGame {
     private RotationController rc;
     private JumpController jc;
 
-    private GameObject avatar, backTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
+    private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
     private GameObject x, y, z; // world axes
 
-    private ObjShape avatarS, ghostS, backTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS, terrS;
+    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS, terrS;
     private ObjShape linxS, linyS, linzS;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT, hills, grass;
@@ -112,9 +112,10 @@ public class MyGame extends VariableFrameRateGame {
     public void loadShapes() {
         avatarS = new ImportedModel("Car.obj");
         ghostS = new ImportedModel("Car.obj");
-        backTireS = new ImportedModel("Tire.obj");
-        frontLeftTireS = new ImportedModel("FrontRightTire1.obj");
-        frontRightTireS = new ImportedModel("FrontRightTire2.obj");
+        backLeftTireS = new ImportedModel("LeftTire.obj");
+        backRightTireS = new ImportedModel("RightTire.obj");
+        frontLeftTireS = new ImportedModel("LeftTire.obj");
+        frontRightTireS = new ImportedModel("RightTire.obj");
         zombieS = new ImportedModel("Zombie.obj");
 
         houseS = new DolphinHouse();
@@ -157,10 +158,12 @@ public class MyGame extends VariableFrameRateGame {
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
         avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0f, 0f, 1.0f, 0.0f);
-        backTire = spawnObject(avatar, backTireS, tireT, 0f, 0f, 0f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.19f, -0.1f, 0.8f, 1f, 0f);
+        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.1f, 0.1f, 1f, 0f);
+        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.1f, 0.1f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.1f, 0.8f, 1f, 0f);
         frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
-        backTire.applyParentRotationToPosition(true);
+        backLeftTire.applyParentRotationToPosition(true);
+        backRightTire.applyParentRotationToPosition(true);
         frontLeftTire.applyParentRotationToPosition(true);
         frontRightTire.applyParentRotationToPosition(true);
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 1.0f, 270.0f);
@@ -218,7 +221,7 @@ public class MyGame extends VariableFrameRateGame {
             setupNetworking();
         }
 
-        carController = new CarController(avatar, frontLeftTire, frontRightTire, protClient, isMultiplayerMode);
+        carController = new CarController(avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire, protClient, isMultiplayerMode);
 
         controlActions();
 
