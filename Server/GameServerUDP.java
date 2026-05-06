@@ -20,6 +20,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	{
 		super(localPort, ProtocolType.UDP);
 		this.npcCtrl = npcCtrl;
+		npcCtrl.start(this);
 	}
 
 	@Override
@@ -78,7 +79,6 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						sendCreateNPCmsg(pos1);
 						//sendCreateNPCmsg(pos2);
 						//sendCreateNPCmsg(pos3);
-						npcCtrl.start(this);
 					}
 				}
 			}
