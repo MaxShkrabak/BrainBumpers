@@ -3,6 +3,7 @@ package a2;
 import org.joml.Math;
 import tage.GameObject;
 import org.joml.*;
+import tage.physics.PhysicsObject;
 
 public class CarController {
     private GameObject avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire;
@@ -47,7 +48,7 @@ public class CarController {
         updateAllTires();
     }
 
-    public void update(float dt) {
+    public void update(float dt, PhysicsObject physicsObj) {
         // speeding up and slowing down
         if (throttle != 0f) {
             float target = MAX_SPEED * throttle;
@@ -69,12 +70,14 @@ public class CarController {
                 avatar.globalYaw(turnAmount);
                 if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount);
             }
+        }
 
+        if (physicsObj != null) {
             Vector4f fwd = new Vector4f(0f, 0f, 1f, 1f);
             fwd.mul(avatar.getWorldRotation());
-            fwd.mul(currentSpeed * dt);
-            Vector3f newPos = avatar.getWorldLocation().add(fwd.x(), fwd.y(), fwd.z());
-            avatar.setLocalLocation(newPos);
+            float[] curVel = physicsObj.getLinearVelocity();
+            physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, curVel[1], fwd.z() * currentSpeed});
+
             if (isMultiplayer && protClient != null) protClient.sendMoveMessage(avatar.getWorldLocation());
         }
 
@@ -110,6 +113,4 @@ public class CarController {
     }
 
     public float getCurrentSpeed() { return currentSpeed; }
-    public float getWheelAngle() { return wheelAngle; }
-    public float getMaxWheelAngle() { return MAX_WHEEL_ANGLE; }
 }

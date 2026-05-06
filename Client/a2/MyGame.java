@@ -15,6 +15,7 @@ import org.joml.*;
 import javax.swing.*;
 
 import tage.networking.IGameConnection.ProtocolType;
+import tage.physics.PhysicsObject;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -157,7 +158,7 @@ public class MyGame extends VariableFrameRateGame {
         (y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 0f, 0f, 1.0f, 0.0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 20.0f, 0f, 1.0f, 0.0f);
         backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.1f, 0.1f, 1f, 0f);
         backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.1f, 0.1f, 1f, 0f);
         frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.1f, 0.8f, 1f, 0f);
@@ -236,6 +237,27 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     @Override
+    public void initializePhysicsObjects() {
+        float[] carSize = {0.5f, 0.3f, 1.0f};
+
+        // terrain mesh
+        (engine.getSceneGraph()).addPhysicsStaticTerrainMesh(
+            new Vector3f(0f, 0f, 0f), new Quaternionf(), hills, 100.0f, 15.0f, 200);
+
+        (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
+
+        // box for the car
+        PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
+            300.0f, avatar.getWorldLocation(), new Quaternionf(), carSize);
+        avatar.setPhysicsObject(carPhysics);
+        carPhysics.disableSleeping();
+        carPhysics.setBounciness(0.3f);
+
+        engine.enableGraphicsWorldRender(); // TODO: Move these to a toggle
+        engine.enablePhysicsWorldRender();
+    }
+
+    @Override
     public void createViewports() {
         viewportController = new ViewportController(engine);
         viewportController.setupViewports();
@@ -250,21 +272,29 @@ public class MyGame extends VariableFrameRateGame {
         double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
         elapsTime += moveTime;
 
-        if(isGameStarted){
+        if(isGameStarted || !isMultiplayerMode) {
             carController.beginFrame();
             im.update((float) moveTime);
-            carController.update((float) moveTime);
+
+            PhysicsObject carPhysics = avatar.getPhysicsObject();
+            carController.update((float) moveTime, carPhysics);
+
+            (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
+
+            if (carPhysics != null) {
+                Vector3f physLoc = carPhysics.getLocation();
+                avatar.setLocalLocation(new Vector3f(physLoc.x, physLoc.y, physLoc.z));
+
+                Quaternionf avatarRot = new Quaternionf();
+                avatar.getWorldRotation().getNormalizedRotation(avatarRot);
+                carPhysics.setTransform(physLoc, avatarRot);
+                carPhysics.setAngularVelocity(new float[]{0f, 0f, 0f});
+            }
 
             orbitController.updateCameraPosition();
         }
 
         updateHud();
-
-        // update altitude of dolphin based on height map
-        Vector3f loc = avatar.getWorldLocation();
-        float height = terr.getHeight(loc.x(), loc.z());
-        height += 0.2f;
-        avatar.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
 
         if (isMultiplayerMode) {
             processNetworking((float)moveTime);
