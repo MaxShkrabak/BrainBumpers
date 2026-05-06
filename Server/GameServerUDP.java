@@ -3,22 +3,28 @@ import java.net.InetAddress;
 import java.util.UUID;
 import java.util.HashMap;
 
+import org.joml.Vector3f;
 import tage.networking.server.GameConnectionServer;
 import tage.networking.server.IClientInfo;
 
 public class GameServerUDP extends GameConnectionServer<UUID> 
 {
-	private static final int MIN_PLAYERS = 1;
+	NPCcontroller npcCtrl;
+
+	private static final int MIN_PLAYERS = 2;
 	private boolean gameStarted = false;
+	private String[] curPos = {"0", "0", "0"};
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 
-	public GameServerUDP(int localPort) throws IOException 
-	{	super(localPort, ProtocolType.UDP);
+	public GameServerUDP(int localPort, NPCcontroller npcCtrl) throws IOException
+	{
+		super(localPort, ProtocolType.UDP);
+		this.npcCtrl = npcCtrl;
+		npcCtrl.start(this);
 	}
 
 	@Override
-	public void processPacket(Object o, InetAddress senderIP, int senderPort)
-	{
+	public void processPacket(Object o, InetAddress senderIP, int senderPort) {
 		String message = (String)o;
 		String[] messageTokens = message.split(",");
 		
@@ -66,6 +72,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						gameStarted = true;
 						System.out.println("[SERVER] All players have readied up, starting game!");
 						startGameMessage();
+						System.out.println("maybe spawning zombie idk");
+						String[] pos1 = {"2.0", "0.0", "5.0"};
+						//String[] pos2 = {"4.0", "2.0", "10.0"};
+						//String[] pos3 = {"-5.0", "0.0", "-5.0"};
+						sendCreateNPCmsg(pos1);
+						//sendCreateNPCmsg(pos2);
+						//sendCreateNPCmsg(pos3);
 					}
 				}
 			}
@@ -107,6 +120,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			if(messageTokens[0].compareTo("move") == 0)
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
 				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
+				System.out.println("THIS IS CAR POS: " + pos[0] + " " + pos[1] + " " + pos[2]);
 				sendMoveMessages(clientID, pos);
 			}
 
@@ -124,9 +138,107 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				System.out.println("[CLIENT]: Confirmation from - " + clientID.toString());
 			}
 
+
+			// Case where server receives request for NPCs
+			// Received Message Format: (needNPC,id)
+			if(messageTokens[0].compareTo("needNPC") == 0)
+			{ System.out.println("server got a needNPC message");
+				UUID clientID = UUID.fromString(messageTokens[1]);
+				sendNPCstart(clientID);
+			}
+
+			// Case where server receives notice that an av is close to the npc
+			// Received Message Format: (isnear,id)
+			if(messageTokens[0].compareTo("isnear") == 0)
+			{ UUID clientID = UUID.fromString(messageTokens[1]);
+				handleNearTiming(clientID);
+			}
+
 		}	}
 
-	// Informs the client who just requested to join the server if their if their 
+	// NPC STUFF
+
+	// --- additional protocol for NPCs ----
+	public void sendCheckForAvatarNear()
+	{
+		try
+		{
+			String message = new String("isnr");
+			message += "," + (npcCtrl.getNPC()).getX();
+			message += "," + (npcCtrl.getNPC()).getY();
+			message += "," + (npcCtrl.getNPC()).getZ();
+			message += "," + (npcCtrl.getCriteria());
+			sendPacketToAll(message);
+		}
+		catch (IOException e)
+		{ System.out.println("couldnt send msg"); e.printStackTrace(); }
+	}
+
+	// get current avatar location
+	public Vector3f sendAvatarLocation() {
+
+		float x = Float.parseFloat(curPos[0]);
+		float y = Float.parseFloat(curPos[1]);
+		float z = Float.parseFloat(curPos[2]);
+
+		return new Vector3f(x, y, z);
+	}
+
+	public void sendNPCinfo()
+	{
+		try {
+			String message = "updateNPC";
+			message += "," + npcCtrl.getNPC().getX();
+			message += "," + npcCtrl.getNPC().getY();
+			message += "," + npcCtrl.getNPC().getZ();
+
+			sendPacketToAll(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendNPCstart(UUID clientID) {
+
+		try {
+			String message = "createNPC," + clientID.toString() + "," + 6 + "," + 0 + "," + 2;
+			sendPacket(message, clientID);
+		} catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+	// ------------ SENDING NPC MESSAGES -----------------
+	// Informs clients of the whereabouts of the NPCs.
+	public void sendCreateNPCmsg(String[] position)
+	{
+		try
+		{
+			System.out.println("server telling clients about an NPC");
+			String message = new String("createNPC");
+			message += "," + position[0];
+			message += "," + position[1];
+			message += "," + position[2];
+			sendPacketToAll(message);
+			System.out.println("printing this to client: " + message);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void handleNearTiming(UUID clientID)
+	{
+		npcCtrl.setNearFlag(true);
+	}
+
+
+	// AVATAR STUFF
+
+
+	// Informs the client who just requested to join the server if their
 	// request was able to be granted. 
 	// Message Format: (join,success) or (join,failure)
 	
@@ -238,6 +350,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			message += "," + position[0];
 			message += "," + position[1];
 			message += "," + position[2];
+			curPos[0] = position[0];
+			curPos[1] = position[1];
+			curPos[2] = position[2];
+			System.out.println(curPos[0] + " " + curPos[1] + " " + curPos[2]);// store the coordinates of car in server memory
 			forwardPacketToAll(message, clientID);
 		} 
 		catch (IOException e) 

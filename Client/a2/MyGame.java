@@ -165,11 +165,11 @@ public class MyGame extends VariableFrameRateGame {
         (y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 20.0f, 0f, 1.0f, 0.0f);
-        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.09f, -0.385f, 1f, 0f);
-        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.09f, -0.385f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.09f, 0.315f, 1f, 0f);
-        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.09f, 0.315f, 1f, 0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20.0f, 15f, 1.0f, 0.0f);
+        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.1f, 0.1f, 1f, 0f);
+        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.1f, 0.1f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.1f, 0.8f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
         backLeftTire.applyParentRotationToPosition(true);
         backRightTire.applyParentRotationToPosition(true);
         frontLeftTire.applyParentRotationToPosition(true);
@@ -266,8 +266,8 @@ public class MyGame extends VariableFrameRateGame {
         carPhysics.disableSleeping();
         carPhysics.setBounciness(0.3f);
 
-        engine.enableGraphicsWorldRender();
-        engine.enablePhysicsWorldRender();
+        //engine.enableGraphicsWorldRender();
+        //engine.enablePhysicsWorldRender();
     }
 
     @Override
@@ -623,6 +623,8 @@ public class MyGame extends VariableFrameRateGame {
     public TextureImage getGhostTexture() { return ghostT; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
+    public AnimatedShape getNPCShape() { return zombieS; }
+    public TextureImage getNPCTexture() { return zombieT; }
 
     private void setupNetworking()
     {	isClientConnected = false;
