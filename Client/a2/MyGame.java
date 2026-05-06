@@ -38,7 +38,8 @@ public class MyGame extends VariableFrameRateGame {
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
     private GameObject x, y, z; // world axes
 
-    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, zombieS, houseS, floorS, terrS;
+    private AnimatedShape zombieS;
+    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, houseS, floorS, terrS;
     private ObjShape linxS, linyS, linzS;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT, hills, grass;
@@ -117,7 +118,8 @@ public class MyGame extends VariableFrameRateGame {
         backRightTireS = new ImportedModel("RightTire.obj");
         frontLeftTireS = new ImportedModel("LeftTire.obj");
         frontRightTireS = new ImportedModel("RightTire.obj");
-        zombieS = new ImportedModel("Zombie.obj");
+        zombieS = new AnimatedShape("zombieMesh.rkm", "zombieSkeleton.rks");
+        zombieS.loadAnimation("RUN", "zombieRunning.rka");
 
         houseS = new DolphinHouse();
 
@@ -136,7 +138,7 @@ public class MyGame extends VariableFrameRateGame {
         avatarT = new TextureImage("CarTexture.png");
         ghostT = new TextureImage("CarTexture.png");
         tireT = new TextureImage("TireTexture.png");
-        zombieT = new TextureImage("ZombieTexture.png");
+        zombieT = new TextureImage("ZombieSkin.png");
 
         brick = new TextureImage("brick1.jpg");
         pyramidTextures = new TextureImage[]{brick};
@@ -167,7 +169,7 @@ public class MyGame extends VariableFrameRateGame {
         backRightTire.applyParentRotationToPosition(true);
         frontLeftTire.applyParentRotationToPosition(true);
         frontRightTire.applyParentRotationToPosition(true);
-        zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 1.0f, 270.0f);
+        zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 0.40f, 270.0f);
 
         // spawn home
         house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
@@ -299,6 +301,8 @@ public class MyGame extends VariableFrameRateGame {
         if (isMultiplayerMode) {
             processNetworking((float)moveTime);
         }
+
+        zombieS.updateAnimation();
     }
 
     private void updateHud() {
@@ -396,6 +400,13 @@ public class MyGame extends VariableFrameRateGame {
                 case KeyEvent.VK_T:
                     toggleRecenter();
                     break;
+
+                case KeyEvent.VK_C:
+                 zombieS.stopAnimation();
+                    zombieS.playAnimation("RUN", 0.45f,
+                            AnimatedShape.EndType.LOOP, 0);
+                    break;
+
             }
 
         }
