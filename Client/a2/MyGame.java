@@ -612,6 +612,8 @@ public class MyGame extends VariableFrameRateGame {
     public TextureImage getGhostTexture() { return ghostT; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
+    public AnimatedShape getNPCShape() { return zombieS; }
+    public TextureImage getNPCTexture() { return zombieT; }
 
     private void setupNetworking()
     {	isClientConnected = false;
