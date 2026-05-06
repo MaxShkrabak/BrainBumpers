@@ -254,9 +254,6 @@ public class MyGame extends VariableFrameRateGame {
         avatar.setPhysicsObject(carPhysics);
         carPhysics.disableSleeping();
         carPhysics.setBounciness(0.3f);
-
-        engine.enableGraphicsWorldRender(); // TODO: Move these to a toggle
-        engine.enablePhysicsWorldRender();
     }
 
     @Override

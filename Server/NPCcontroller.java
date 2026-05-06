@@ -1,3 +1,9 @@
+import java.util.Random;
+import tage.*;
+import tage.ai.behaviortrees.BTCompositeType;
+import tage.ai.behaviortrees.BTSequence;
+import tage.ai.behaviortrees.BehaviorTree;
+
 public class NPCcontroller {
 
     private NPC npc;
@@ -5,7 +11,7 @@ public class NPCcontroller {
     BehaviorTree bt = new BehaviorTree(BTCompositeType.SELECTOR);
     boolean nearFlag = false;
     long thinkStartTime, tickStartTime, lastThinkUpdateTime, lastTickUpdateTime;
-    GameAIServerUDP server;
+    GameServerUDP server;
     double criteria = 2.0;
 
     public void updateNPCs()
@@ -13,7 +19,7 @@ public class NPCcontroller {
         npc.updateLocation();
     }
 
-    public void start(GameAIServerUDP s)
+    public void start(GameServerUDP s)
     {
         thinkStartTime = System.nanoTime();
         tickStartTime = System.nanoTime();
@@ -28,7 +34,7 @@ public class NPCcontroller {
     public void setupNPCs()
     {
         npc = new NPC();
-        npc.randomizeLocation(rn.nextInt(40),rn.nextInt(40));
+        npc.randomizeLocation(rn.nextInt(10),rn.nextInt(10));
     }
 
     public void npcLoop()
@@ -59,11 +65,26 @@ public class NPCcontroller {
 
     public void setupBehaviorTree()
     {
-        bt.insertAtRoot(new BTSequence(10));
+        //bt.insertAtRoot(new BTSequence(10));
         bt.insertAtRoot(new BTSequence(20));
-        bt.insert(10, new OneSecPassed(this,npc,false));
-        bt.insert(10, new GetSmall(npc));
+        //bt.insert(10, new OneSecPassed(this,npc,false));
+        //bt.insert(10, new GetSmall(npc));
         bt.insert(20, new AvatarNear(server,this,npc,false));
-        bt.insert(20, new GetBig(npc));
+        //bt.insert(20, new GetBig(npc));
     }
+
+    public NPC getNPC() {
+        return npc;
+    }
+
+    public double getCriteria() {
+        return criteria;
+    }
+    public boolean getNearFlag(){
+        return nearFlag;
+    }
+    public void setNearFlag(boolean flag){
+        nearFlag = flag;
+    }
+
 }

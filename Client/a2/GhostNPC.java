@@ -7,13 +7,15 @@ import tage.shapes.AnimatedShape;
 
 public class GhostNPC extends GameObject {
     private int id;
-    public GhostNPC(int id, AnimatedShape s, TextureImage t, Vector3f p)
+    public GhostNPC(int id, AnimatedShape s, TextureImage t, Vector3f p, float scale)
     { super(GameObject.root(), s, t);
         this.id = id;
         setPosition(p);
+        this.setLocalScale(new Matrix4f().scaling(scale));
     }
 
     public void setPosition(Vector3f p) {
+        this.setLocalLocation(p);
     }
 
     public void setSize(boolean big)

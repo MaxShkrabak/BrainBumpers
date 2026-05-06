@@ -6,7 +6,6 @@ public class NetworkingServer
 	private GameServerUDP thisUDPServer;
 	private GameServerTCP thisTCPServer;
 
-	private GameAIServerUDP UDPServer;
 	private NPCcontroller npcCtrl;
 
 	public NetworkingServer(int serverPort, String protocol) 

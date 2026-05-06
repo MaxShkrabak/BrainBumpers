@@ -148,15 +148,29 @@ public class ProtocolClient extends GameConnectionClient
 				// create a new ghost NPC
 				// Parse out the position
 				Vector3f ghostPosition = new Vector3f(
-						Float.parseFloat(messageTokens[1]),
 						Float.parseFloat(messageTokens[2]),
-						Float.parseFloat(messageTokens[3]));
-
+						Float.parseFloat(messageTokens[3]),
+						Float.parseFloat(messageTokens[4]));
 				try {
 					createGhostNPC(ghostPosition);
 				} catch (IOException e) {
 
 				} // error creating ghost avatar
+			}
+
+			if (messageTokens[0].compareTo("updateNPC") == 0)
+			{
+				// create a new ghost NPC
+				// Parse out the position
+				Vector3f ghostPosition = new Vector3f(
+						Float.parseFloat(messageTokens[2]),
+						Float.parseFloat(messageTokens[3]),
+						Float.parseFloat(messageTokens[4]));
+				try {
+					updateGhostNPC(ghostPosition, 2.0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} // error updating ghost avatar
 			}
 		}	}
 
@@ -164,9 +178,9 @@ public class ProtocolClient extends GameConnectionClient
 	private void createGhostNPC(Vector3f position) throws IOException
 	{ if (ghostNPC == null)
 		ghostNPC = new GhostNPC(0, game.getNPCShape(),
-				game.getNPCTexture(), position);
+				game.getNPCTexture(), position, 1.0f);
 	}
-	private void updateGhostNPC(Vector3f position, double gsize)
+	private void updateGhostNPC(Vector3f position, double gsize) throws IOException
 	{ boolean gs;
 		if (ghostNPC == null)
 		{ try

@@ -21,8 +21,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	}
 
 	@Override
-	public void processPacket(Object o, InetAddress senderIP, int senderPort)
-	{
+	public void processPacket(Object o, InetAddress senderIP, int senderPort) {
 		String message = (String)o;
 		String[] messageTokens = message.split(",");
 		
@@ -70,6 +69,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						gameStarted = true;
 						System.out.println("[SERVER] All players have readied up, starting game!");
 						startGameMessage();
+						System.out.println("maybe spawning zombie idk");
+						String[] pos = {"2.0", "0.0", "5.0"};
+						sendCreateNPCmsg(clientID, pos);
+						npcCtrl.start(this);
 					}
 				}
 			}
@@ -136,6 +139,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				UUID clientID = UUID.fromString(messageTokens[1]);
 				sendNPCstart(clientID);
 			}
+
 			// Case where server receives notice that an av is close to the npc
 			// Received Message Format: (isnear,id)
 			if(messageTokens[0].compareTo("isnear") == 0)
@@ -165,13 +169,28 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 	public void sendNPCinfo()
 	{
+		try {
+			String message = "updateNPC, 0";
+			message += "," + npcCtrl.getNPC().getX();
+			message += "," + npcCtrl.getNPC().getY();
+			message += "," + npcCtrl.getNPC().getZ();
 
+			sendPacketToAll(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void sendNPCstart(UUID clientID)
-	{
+	public void sendNPCstart(UUID clientID) {
 
-	}
+		try {
+			String message = "createNPC," + clientID.toString() + "," + 6 + "," + 0 + "," + 2;
+			sendPacket(message, clientID);
+		} catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 	// ------------ SENDING NPC MESSAGES -----------------
 	// Informs clients of the whereabouts of the NPCs.
@@ -184,7 +203,8 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			message += "," + position[0];
 			message += "," + position[1];
 			message += "," + position[2];
-			forwardPacketToAll(message, clientID);
+			sendPacketToAll(message);
+			System.out.println("printing this to client: " + message);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -201,7 +221,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// AVATAR STUFF
 
 
-	// Informs the client who just requested to join the server if their if their 
+	// Informs the client who just requested to join the server if their
 	// request was able to be granted. 
 	// Message Format: (join,success) or (join,failure)
 	
