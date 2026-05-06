@@ -37,12 +37,15 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
     private GameObject x, y, z; // world axes
+    private GameObject tallBuilding;
 
     private AnimatedShape zombieS;
     private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, houseS, floorS, terrS;
     private ObjShape linxS, linyS, linzS;
+    private ObjShape tallBuildingS;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT, hills, grass;
+    private TextureImage tallBuildingT;
     private TextureImage[] pyramidTextures;
 
     private Light light1, khafreLight, khufuLight, menkaureLight;
@@ -114,6 +117,7 @@ public class MyGame extends VariableFrameRateGame {
     public void loadShapes() {
         avatarS = new ImportedModel("Car.obj");
         ghostS = new ImportedModel("Car.obj");
+        tallBuildingS = new ImportedModel("TallBuilding.obj");
         backLeftTireS = new ImportedModel("LeftTire.obj");
         backRightTireS = new ImportedModel("RightTire.obj");
         frontLeftTireS = new ImportedModel("LeftTire.obj");
@@ -139,6 +143,7 @@ public class MyGame extends VariableFrameRateGame {
         ghostT = new TextureImage("CarTexture.png");
         tireT = new TextureImage("TireTexture.png");
         zombieT = new TextureImage("ZombieSkin.png");
+        tallBuildingT = new TextureImage("Texture_Yellow.png");
 
         brick = new TextureImage("brick1.jpg");
         pyramidTextures = new TextureImage[]{brick};
@@ -161,15 +166,16 @@ public class MyGame extends VariableFrameRateGame {
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
         avatar = spawnObject(GameObject.root(), avatarS, avatarT, 0f, 20.0f, 0f, 1.0f, 0.0f);
-        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.1f, 0.1f, 1f, 0f);
-        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.1f, 0.1f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.1f, 0.8f, 1f, 0f);
-        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
+        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.09f, -0.385f, 1f, 0f);
+        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.09f, -0.385f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.09f, 0.315f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.09f, 0.315f, 1f, 0f);
         backLeftTire.applyParentRotationToPosition(true);
         backRightTire.applyParentRotationToPosition(true);
         frontLeftTire.applyParentRotationToPosition(true);
         frontRightTire.applyParentRotationToPosition(true);
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 0.40f, 270.0f);
+        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, 25f, 0f, 14f, 2f, 0f);
 
         // spawn home
         house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
@@ -240,13 +246,18 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void initializePhysicsObjects() {
-        float[] carSize = {0.5f, 0.3f, 1.0f};
+        float[] carSize = {0.5f, 0.3f, 1.25f};
 
         // terrain mesh
         (engine.getSceneGraph()).addPhysicsStaticTerrainMesh(
             new Vector3f(0f, 0f, 0f), new Quaternionf(), hills, 100.0f, 15.0f, 200);
 
         (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
+
+        // tall building hitbox
+        float[] buildSize = {4.05f, 20f, 4.05f};
+        (engine.getSceneGraph()).addPhysicsBox(
+            0.0f, tallBuilding.getWorldLocation(), new Quaternionf(), buildSize);
 
         // box for the car
         PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
@@ -255,7 +266,7 @@ public class MyGame extends VariableFrameRateGame {
         carPhysics.disableSleeping();
         carPhysics.setBounciness(0.3f);
 
-        engine.enableGraphicsWorldRender(); // TODO: Move these to a toggle
+        engine.enableGraphicsWorldRender();
         engine.enablePhysicsWorldRender();
     }
 
