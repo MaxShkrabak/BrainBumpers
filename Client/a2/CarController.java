@@ -76,7 +76,8 @@ public class CarController {
             Vector4f fwd = new Vector4f(0f, 0f, 1f, 1f);
             fwd.mul(avatar.getWorldRotation());
             float[] curVel = physicsObj.getLinearVelocity();
-            physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, curVel[1], fwd.z() * currentSpeed});
+            float vertVel = Math.min(curVel[1], 0f); // to help prevent collision climbing
+            physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, vertVel, fwd.z() * currentSpeed});
 
             System.out.println("Checking car controller line 81");
             if (isMultiplayer && protClient != null){ System.out.println("Checking car controller line 82"); protClient.sendMoveMessage(avatar.getWorldLocation());}
