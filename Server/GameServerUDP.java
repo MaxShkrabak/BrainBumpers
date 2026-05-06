@@ -3,6 +3,7 @@ import java.net.InetAddress;
 import java.util.UUID;
 import java.util.HashMap;
 
+import org.joml.Vector3f;
 import tage.networking.server.GameConnectionServer;
 import tage.networking.server.IClientInfo;
 
@@ -10,8 +11,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 {
 	NPCcontroller npcCtrl;
 
-	private static final int MIN_PLAYERS = 1;
+	private static final int MIN_PLAYERS = 2;
 	private boolean gameStarted = false;
+	private String[] curPos = {"0", "0", "0"};
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 
 	public GameServerUDP(int localPort, NPCcontroller npcCtrl) throws IOException
@@ -70,8 +72,12 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						System.out.println("[SERVER] All players have readied up, starting game!");
 						startGameMessage();
 						System.out.println("maybe spawning zombie idk");
-						String[] pos = {"2.0", "0.0", "5.0"};
-						sendCreateNPCmsg(clientID, pos);
+						String[] pos1 = {"2.0", "0.0", "5.0"};
+						//String[] pos2 = {"4.0", "2.0", "10.0"};
+						//String[] pos3 = {"-5.0", "0.0", "-5.0"};
+						sendCreateNPCmsg(pos1);
+						//sendCreateNPCmsg(pos2);
+						//sendCreateNPCmsg(pos3);
 						npcCtrl.start(this);
 					}
 				}
@@ -114,6 +120,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			if(messageTokens[0].compareTo("move") == 0)
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
 				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
+				System.out.println("THIS IS CAR POS: " + pos[0] + " " + pos[1] + " " + pos[2]);
 				sendMoveMessages(clientID, pos);
 			}
 
@@ -167,10 +174,20 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{ System.out.println("couldnt send msg"); e.printStackTrace(); }
 	}
 
+	// get current avatar location
+	public Vector3f sendAvatarLocation() {
+
+		float x = Float.parseFloat(curPos[0]);
+		float y = Float.parseFloat(curPos[1]);
+		float z = Float.parseFloat(curPos[2]);
+
+		return new Vector3f(x, y, z);
+	}
+
 	public void sendNPCinfo()
 	{
 		try {
-			String message = "updateNPC, 0";
+			String message = "updateNPC";
 			message += "," + npcCtrl.getNPC().getX();
 			message += "," + npcCtrl.getNPC().getY();
 			message += "," + npcCtrl.getNPC().getZ();
@@ -194,12 +211,12 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 	// ------------ SENDING NPC MESSAGES -----------------
 	// Informs clients of the whereabouts of the NPCs.
-	public void sendCreateNPCmsg(UUID clientID, String[] position)
+	public void sendCreateNPCmsg(String[] position)
 	{
 		try
 		{
 			System.out.println("server telling clients about an NPC");
-			String message = new String("createNPC," + clientID.toString());
+			String message = new String("createNPC");
 			message += "," + position[0];
 			message += "," + position[1];
 			message += "," + position[2];
@@ -333,6 +350,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			message += "," + position[0];
 			message += "," + position[1];
 			message += "," + position[2];
+			curPos[0] = position[0];
+			curPos[1] = position[1];
+			curPos[2] = position[2];
+			System.out.println(curPos[0] + " " + curPos[1] + " " + curPos[2]);// store the coordinates of car in server memory
 			forwardPacketToAll(message, clientID);
 		} 
 		catch (IOException e) 

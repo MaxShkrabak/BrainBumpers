@@ -78,7 +78,9 @@ public class CarController {
             float[] curVel = physicsObj.getLinearVelocity();
             physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, curVel[1], fwd.z() * currentSpeed});
 
-            if (isMultiplayer && protClient != null) protClient.sendMoveMessage(avatar.getWorldLocation());
+            System.out.println("Checking car controller line 81");
+            if (isMultiplayer && protClient != null){ System.out.println("Checking car controller line 82"); protClient.sendMoveMessage(avatar.getWorldLocation());}
+            System.out.println("Checking car controller line 83");
         }
 
         // spin tires based on speed

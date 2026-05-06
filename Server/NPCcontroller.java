@@ -1,4 +1,6 @@
 import java.util.Random;
+
+import org.joml.Vector3f;
 import tage.*;
 import tage.ai.behaviortrees.BTCompositeType;
 import tage.ai.behaviortrees.BTSequence;
@@ -13,6 +15,7 @@ public class NPCcontroller {
     long thinkStartTime, tickStartTime, lastThinkUpdateTime, lastTickUpdateTime;
     GameServerUDP server;
     double criteria = 2.0;
+    Vector3f carPos;
 
     public void updateNPCs()
     {
@@ -50,13 +53,14 @@ public class NPCcontroller {
             {
                 lastTickUpdateTime = currentTime;
                 npc.updateLocation();
-                server.sendNPCinfo();
+                //server.sendNPCinfo();
             }
 
             if (elapsedThinkMilliSecs >= 250.0f)
             {
                 lastThinkUpdateTime = currentTime;
                 bt.update(elapsedThinkMilliSecs);
+                server.sendNPCinfo();
             }
 
             Thread.yield();
@@ -65,11 +69,12 @@ public class NPCcontroller {
 
     public void setupBehaviorTree()
     {
-        //bt.insertAtRoot(new BTSequence(10));
-        bt.insertAtRoot(new BTSequence(20));
-        //bt.insert(10, new OneSecPassed(this,npc,false));
+        bt.insertAtRoot(new BTSequence(10));
+        //bt.insertAtRoot(new BTSequence(20));
+        //bt.insert(10, new AvatarNear(server,this,npc,false));
+        bt.insert(10, new MoveToAvatar(server,this,npc));
         //bt.insert(10, new GetSmall(npc));
-        bt.insert(20, new AvatarNear(server,this,npc,false));
+        //bt.insert(20, new AvatarNear(server,this,npc,false));
         //bt.insert(20, new GetBig(npc));
     }
 
@@ -86,5 +91,6 @@ public class NPCcontroller {
     public void setNearFlag(boolean flag){
         nearFlag = flag;
     }
+    public void setCurAvatarPos(Vector3f pos){ carPos = pos;}
 
 }

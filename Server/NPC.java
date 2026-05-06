@@ -1,3 +1,4 @@
+import org.joml.Vector3f;
 public class NPC {
     double locationX, locationY, locationZ;
     double dir = 0.1;
@@ -19,15 +20,22 @@ public class NPC {
     public double getY() { return locationY; }
     public double getZ() { return locationZ; }
 
+    public void setX(double x) { locationX = x;}
+    public void setY(double y) { locationY = y; }
+    public void setZ(double z) { locationZ = z;}
+
     public void getBig() { size=2.0; }
     public void getSmall() { size=1.0; }
     public double getSize() { return size; }
 
     public void updateLocation()
     {
-        if (locationX > 10) dir=-0.1;
-        if (locationX < -10) dir=0.1;
+//        if (locationX > 10) dir=-0.1;
+//        if (locationX < -10) dir=0.1;
+//
+//        locationX = locationX + dir;
+    }
+    public void moveTowardAvatar(Vector3f avatarPos){
 
-        locationX = locationX + dir;
     }
 }
