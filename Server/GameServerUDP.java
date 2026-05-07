@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.HashMap;
 
@@ -72,12 +73,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 					// Starts the game when all players have connected and readied up
 					if (getClients().size() >= MIN_PLAYERS && !readyStatus.containsValue(false)) {
 						gameStarted = true;
-						System.out.println("[SERVER] All players have readied up, starting game!");
+						System.out.println("[SERVER]: All players have readied up, starting game!");
 						startGameMessage();
 
-						sendCreateNPCmsg();
-						sendCreateNPCmsg();
-						sendCreateNPCmsg();
+						beginWave();
 					}
 				}
 			}
@@ -157,6 +156,22 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// NPC STUFF
 
 	// --- additional protocol for NPCs ----
+
+	public void beginWave() {
+		Random rn = new Random();
+		int genWave = rn.nextInt(3,5) * getClients().size();
+
+		try {
+			System.out.println("[SERVER]: First wave has start with " + genWave + " Zombies!");
+			for (int i = 0; i < genWave; i++){
+				sendCreateNPCmsg();
+			}
+			String message = new String("wave," + genWave);
+			sendPacketToAll(message);
+		} catch (IOException e)
+		{ System.out.println("couldnt start wave"); e.printStackTrace(); }
+
+	}
 	public void sendCheckForAvatarNear(NPC npc)
 	{
 		try
@@ -216,6 +231,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			message += "," + npc.getX();
 			message += "," + npc.getY();
 			message += "," + npc.getZ();
+			message += "," + npc.getRotationY();
 
 			sendPacketToAll(message);
 		} catch (IOException e) {
@@ -241,7 +257,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		try
 		{
 			NPC npc = npcCtrl.spawnNPC();
-			System.out.println("server telling clients about an NPC");
+			System.out.println("[SERVER]: Spawning an NPC at: X: "+ npc.getX() + " Y: " + npc.getY() + " Z: " + npc.getZ());
 			String message = new String("createNPC," + npc.getID());
 			message += "," + npc.getX();
 			message += "," + npc.getY();

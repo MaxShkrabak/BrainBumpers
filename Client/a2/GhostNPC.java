@@ -5,20 +5,48 @@ import org.joml.Matrix4f;
 import tage.*;
 import tage.shapes.AnimatedShape;
 
-import java.util.UUID;
-
 public class GhostNPC extends GameObject {
     private int id;
-    public GhostNPC(int id, AnimatedShape s, TextureImage t, Vector3f p, float scale)
+    private AnimatedShape npcS;
+    private Vector3f stablePos;
+    private int tickCount = 0;
+    private boolean isRunning = false;
+
+    public GhostNPC(int id, AnimatedShape s, TextureImage t, Vector3f p, float rot, float scale)
     { super(GameObject.root(), s, t);
         this.id = id;
-        setPosition(p);
+        npcS = s;
+        stablePos = p;
+        setPosition(p, rot);
         this.setLocalScale(new Matrix4f().scaling(scale));
     }
 
     public int getID() { return id; }
-    public void setPosition(Vector3f p) {
+
+    public void setPosition(Vector3f p, float rot) {
+        tickCount++;
+
+        if (tickCount >= 8) {
+            tickCount = 0;
+            float dist = stablePos.distance(p);
+
+            if (dist > 0.004f) {
+                if (!isRunning) {
+                    this.npcS.playAnimation("RUN", 0.45f,
+                            AnimatedShape.EndType.LOOP, 0);
+                    isRunning = true;
+                }
+            } else {
+                if (isRunning) {
+                    this.npcS.stopAnimation();
+                    isRunning = false;
+                }
+            }
+            stablePos.set(p);
+        }
+
         this.setLocalLocation(p);
+        this.setLocalRotation((new Matrix4f()).rotationY((float)java.lang.Math.toRadians(rot)));
     }
 
     public void setSize(boolean big)

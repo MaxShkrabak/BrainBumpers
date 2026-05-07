@@ -144,6 +144,11 @@ public class ProtocolClient extends GameConnectionClient
 				ghostManager.updateGhostAvatarRotation(ghostID, ghostRotation);
 			}
 
+			if (messageTokens[0].compareTo("wave") == 0)
+			{
+				game.setZombiesAlive(Integer.parseInt(messageTokens[1]));
+			}
+
 			if (messageTokens[0].compareTo("createNPC") == 0)
 			{
 				int NPCid = Integer.parseInt(messageTokens[1]);
@@ -155,7 +160,7 @@ public class ProtocolClient extends GameConnectionClient
 						Float.parseFloat(messageTokens[4]));
 				try {
 					ghostManager.createGhostNPC(NPCid, ghostPosition);
-					System.out.println("Creating npc in prot client with id: " + NPCid);
+					//System.out.println("Creating npc in prot client with id: " + NPCid);
 				} catch (IOException e) {
 
 				} // error creating ghost avatar
@@ -166,13 +171,13 @@ public class ProtocolClient extends GameConnectionClient
 				int NPCid = Integer.parseInt(messageTokens[1]);
 				// create a new ghost NPC
 				// Parse out the position
-				Vector3f ghostPosition = new Vector3f(
-						Float.parseFloat(messageTokens[2]),
-						Float.parseFloat(messageTokens[3]),
-						Float.parseFloat(messageTokens[4]));
+				String[] ghostPosition = new String[]{
+						messageTokens[2],
+						messageTokens[3],
+						messageTokens[4]};
+				float rot = Float.parseFloat(messageTokens[5]);
 				try {
-					ghostManager.updateGhostNPC(NPCid, ghostPosition, 2.0);
-					System.out.println("updating npc in prot client with id: " + NPCid);
+					ghostManager.updateGhostNPC(NPCid, ghostPosition, rot);
 				} catch (IOException e) {
 					e.printStackTrace();
 				} // error updating ghost avatar

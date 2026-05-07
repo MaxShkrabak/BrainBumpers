@@ -1,10 +1,8 @@
-import java.util.Arrays;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.joml.Vector3f;
-import tage.*;
 import tage.ai.behaviortrees.BTCompositeType;
 import tage.ai.behaviortrees.BTSequence;
 import tage.ai.behaviortrees.BehaviorTree;
@@ -12,6 +10,7 @@ import tage.ai.behaviortrees.BehaviorTree;
 public class NPCcontroller {
 
     private List<NPC> npcs = new ArrayList<>();
+    private int totalNPCcount = 1;
     private List<BehaviorTree> behaviorTrees = new ArrayList<>();
 
     Random rn = new Random();
@@ -43,17 +42,17 @@ public class NPCcontroller {
 
     public NPC spawnNPC()
     {
-        int nextNPCcount = npcs.size()+1;
-        NPC npc = new NPC(nextNPCcount);
+        NPC npc = new NPC(totalNPCcount);
         npc.randomizeLocation(rn.nextInt(40), rn.nextInt(15));
         npcs.add(npc);
 
-        System.out.println("spawned an npc at: " + Arrays.toString(npc.getLocation()));
+        //System.out.println("spawned npc at: " + Arrays.toString(npc.getLocation()));
         BehaviorTree bt = new BehaviorTree(BTCompositeType.SELECTOR);
         bt.insertAtRoot(new BTSequence(10));
         bt.insert(10, new MoveToAvatar(server, this, npc));
         behaviorTrees.add(bt);
 
+        totalNPCcount++;
         return npc;
     }
 
@@ -66,7 +65,7 @@ public class NPCcontroller {
             float elapsedTickMilliSecs =
                     (currentTime-lastTickUpdateTime)/(1000000.0f);
 
-            if (elapsedTickMilliSecs >= 25.0f) {
+            if (elapsedTickMilliSecs >= 30.0f) {
                 lastTickUpdateTime = currentTime;
                 for (NPC npc : npcs) {
                     npc.updateLocation();

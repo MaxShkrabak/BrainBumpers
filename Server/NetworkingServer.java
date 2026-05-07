@@ -16,7 +16,8 @@ public class NetworkingServer
 			{	thisTCPServer = new GameServerTCP(serverPort);
 			}
 			else
-			{	thisUDPServer = new GameServerUDP(serverPort, npcCtrl);
+			{	System.out.printf("\n-=-=-=--- Launched Server:   Port: %d  Protocol: %s ---=-=-=-\n", serverPort, protocol.toUpperCase());
+				thisUDPServer = new GameServerUDP(serverPort, npcCtrl);
 			}
 		} 
 		catch (IOException e) 
@@ -27,7 +28,6 @@ public class NetworkingServer
 	public static void main(String[] args) 
 	{	if(args.length > 1)
 		{	NetworkingServer app = new NetworkingServer(Integer.parseInt(args[0]), args[1]);
-			System.out.printf("\n-=-=-=--- Launched Server:   Port: %d  Protocol: %s ---=-=-=-\n", Integer.parseInt(args[0]), args[1]);
 		}
 	}
 

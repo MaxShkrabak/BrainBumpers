@@ -1,8 +1,6 @@
 package a2;
 
-import java.awt.Color;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.Vector;
@@ -26,19 +24,25 @@ public class GhostManager
 		System.out.println("[SERVER]: Adding NPC with ID --> " + id);
 		AnimatedShape s = game.getNPCShape();
 		TextureImage t = game.getNPCTexture();
-		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0.4f);
+		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0, 0.08f);
 		ghostNPCs.add(newNPC);
 	}
 
-	public void updateGhostNPC(int id, Vector3f position, double gsize) throws IOException
+	public void updateGhostNPC(int id, String[] position, float rot) throws IOException
 	{
-		boolean gs;
 		GhostNPC ghostNPC = findNPC(id);
 
-        assert ghostNPC != null;
-        ghostNPC.setPosition(position);
-		//if (gsize == 1.0) gs=false; else gs=true;
-		//ghostNPC.setSize(gs);
+		Vector3f ghostPosition = new Vector3f(
+				Float.parseFloat(position[0]),
+				Float.parseFloat(position[1]),
+				Float.parseFloat(position[2]));
+
+        try {
+			ghostNPC.setPosition(ghostPosition, rot);
+		} catch (Error e){
+			e.printStackTrace();
+			System.out.println("couldn't update");
+		}
 	}
 
 	private GhostNPC findNPC(int id)

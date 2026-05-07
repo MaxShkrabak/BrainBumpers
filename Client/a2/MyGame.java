@@ -48,7 +48,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private Light light1, moonLight;
 
-    private int score = 0;
+    private int score = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
     private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false, showPhysics = false;
 
@@ -198,7 +198,7 @@ public class MyGame extends VariableFrameRateGame {
         frontRightTire.applyParentRotationToPosition(true);
 
         // zombies
-        zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 0.40f, 270.0f);
+        zombie = spawnObject(GameObject.root(), zombieS, zombieT, 25f, 15f, 14f, 0.50f, 230.0f);
 
         // buildings
         tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, 25f, 0f, 14f, 2f, 0f);
@@ -377,7 +377,7 @@ public class MyGame extends VariableFrameRateGame {
             if (!isGameStarted) {
                 actionMsg = "Game has not yet started!";
             } else {
-                actionMsg = "Wave 5";
+                actionMsg = "Zombies Alive: " + zombiesAlive;
             }
         }
 
@@ -704,11 +704,12 @@ public class MyGame extends VariableFrameRateGame {
                 displayAction("A Player has left the game!", 2);
                 break;
             case "startMsg":
-                displayAction("The game has been started!", 2);
+                displayAction("The game has been started, good luck!", 2);
                 isGameStarted = true;
                 break;
         }
     }
+    public void setZombiesAlive(int alive){ zombiesAlive = alive; }
 
     private class SendCloseConnectionPacketAction extends AbstractInputAction
     {	@Override
