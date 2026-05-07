@@ -11,7 +11,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 {
 	NPCcontroller npcCtrl;
 
-	private static final int MIN_PLAYERS = 2;
+	private static final int MIN_PLAYERS = 1;
 	private boolean gameStarted = false;
 	private String[] curPos = {"0", "0", "0"};
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();

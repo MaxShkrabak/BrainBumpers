@@ -20,8 +20,6 @@ import tage.physics.PhysicsObject;
 import java.io.*;
 import java.net.InetAddress;
 
-import java.net.UnknownHostException;
-
 import static tage.GameObject.spawnObject;
 
 public class MyGame extends VariableFrameRateGame {
@@ -35,25 +33,23 @@ public class MyGame extends VariableFrameRateGame {
     private RotationController rc;
     private JumpController jc;
 
-    private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, house, floor, terr;
+    private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, terr;
     private GameObject x, y, z; // world axes
     private GameObject tallBuilding;
 
     private AnimatedShape zombieS;
-    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, houseS, floorS, terrS;
+    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS;
     private ObjShape linxS, linyS, linzS;
     private ObjShape tallBuildingS;
 
-    private TextureImage avatarT, ghostT, tireT, zombieT, brick, floorT, hills, grass;
+    private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
     private TextureImage tallBuildingT;
-    private TextureImage[] pyramidTextures;
 
-    private Light light1, khafreLight, khufuLight, menkaureLight;
+    private Light light1, moonLight;
 
     private int score = 0;
     private double lastFrameTime, currFrameTime, elapsTime;
-    private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false;
-    private static final int FLOOR_TEXTURE_TILE = 20;
+    private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false, showPhysics = false;
 
     private String actionMsg = "";
     private float actionTimer = 0.0f;
@@ -69,7 +65,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private CarController carController;
 
-    private boolean isMultiplayerMode;
+    private final boolean isMultiplayerMode;
     private String serverAddress;
     private int serverPort;
     private ProtocolType serverProtocol;
@@ -115,44 +111,46 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadShapes() {
-        avatarS = new ImportedModel("Car.obj");
-        ghostS = new ImportedModel("Car.obj");
-        tallBuildingS = new ImportedModel("TallBuilding.obj");
-        backLeftTireS = new ImportedModel("LeftTire.obj");
-        backRightTireS = new ImportedModel("RightTire.obj");
-        frontLeftTireS = new ImportedModel("LeftTire.obj");
-        frontRightTireS = new ImportedModel("RightTire.obj");
-        zombieS = new AnimatedShape("zombieMesh.rkm", "zombieSkeleton.rks");
-        zombieS.loadAnimation("RUN", "zombieRunning.rka");
-
-        houseS = new DolphinHouse();
-
-        floorS = new Plane();
-
         // world axes
         linxS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(3f, 0.01f, 0f));
         linyS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(0f, 3.01f, 0f));
         linzS = new Line(new Vector3f(0f, 0.01f, 0f), new Vector3f(0f, 0.01f, -3f));
 
+        // car shapes
+        avatarS = new ImportedModel("Car.obj");
+        ghostS = new ImportedModel("Car.obj");
+        backLeftTireS = new ImportedModel("LeftTire.obj");
+        backRightTireS = new ImportedModel("RightTire.obj");
+        frontLeftTireS = new ImportedModel("LeftTire.obj");
+        frontRightTireS = new ImportedModel("RightTire.obj");
+
+        // zombie animation
+        zombieS = new AnimatedShape("zombieMesh.rkm", "zombieSkeleton.rks");
+        zombieS.loadAnimation("RUN", "zombieRunning.rka");
+
+        // building shapes
+        tallBuildingS = new ImportedModel("TallBuilding.obj");
+
+        // terrain shape
         terrS = new TerrainPlane(200); // pixels per axis = 200x200
     }
 
     @Override
     public void loadTextures() {
+        // car textures
         avatarT = new TextureImage("CarTexture.png");
         ghostT = new TextureImage("CarTexture.png");
         tireT = new TextureImage("TireTexture.png");
+
+        // zombie textures
         zombieT = new TextureImage("ZombieSkin.png");
+
+        // building textures
         tallBuildingT = new TextureImage("Texture_Yellow.png");
 
-        brick = new TextureImage("brick1.jpg");
-        pyramidTextures = new TextureImage[]{brick};
-
-        floorT = new TextureImage("desert.jpg");
-
-        // Terrain stuff
-        hills = new TextureImage("cityMap.png");
-        grass = new TextureImage("cityTexture.png");
+        // terrain textures
+        hills = new TextureImage("cityMap.png");    // height map
+        road = new TextureImage("cityTexture.png"); // painted terrain
     }
 
     @Override
@@ -165,31 +163,32 @@ public class MyGame extends VariableFrameRateGame {
         (y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
+        // car
         avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20.0f, 15f, 1.0f, 0.0f);
-        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.1f, 0.1f, 1f, 0f);
-        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.1f, 0.1f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.1f, 0.8f, 1f, 0f);
-        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.1f, 0.8f, 1f, 0f);
+        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.09f, -0.385f, 1f, 0f);
+        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.09f, -0.385f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.09f, 0.315f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.09f, 0.315f, 1f, 0f);
+
         backLeftTire.applyParentRotationToPosition(true);
         backRightTire.applyParentRotationToPosition(true);
         frontLeftTire.applyParentRotationToPosition(true);
         frontRightTire.applyParentRotationToPosition(true);
+
+        // zombies
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 4f, 0f, 4f, 0.40f, 270.0f);
+
+        // buildings
         tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, 25f, 0f, 14f, 2f, 0f);
 
-        // spawn home
-        house = spawnObject(GameObject.root(), houseS, brick, 18f, 2.01f, 2f, 2f, 0f);
-
-        // build terrain object
+        // terrain
         Matrix4f initialTranslation, initialScale;
-        terr = new GameObject(GameObject.root(), terrS, grass);
+        terr = new GameObject(GameObject.root(), terrS, road);
         initialTranslation = (new Matrix4f()).translation(0f,0f,0f);
         terr.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(100.0f, 15.0f, 100.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(hills);
-
-        // set tiling for terrain texture
         terr.getRenderStates().setTiling(1);
         terr.getRenderStates().setTileFactor(1);
     }
@@ -201,12 +200,7 @@ public class MyGame extends VariableFrameRateGame {
         light1.setLocation(new Vector3f(5.0f, 4.0f, 2.0f));
         (engine.getSceneGraph()).addLight(light1);
 
-        khafreLight = setLight(new Vector3f(70f, 26f, 65f), 5f, 0f, 3f);
-
-        khufuLight = setLight(new Vector3f(-15f, 36f, -75f), 7f, 3f, 0f);
-        khufuLight.setLinearAttenuation(0.01f); // allows light to reach the surface
-
-        menkaureLight = setLight(new Vector3f(-55f, 16f, 35f), 0f, 5f, 1f);
+        moonLight = setLight(new Vector3f(0f, 10f, 0f), 5f, 0f, 3f); // TODO: If we change the skybox to include a moon
     }
 
     private Light setLight(Vector3f location, float r, float g, float b) {
@@ -233,15 +227,6 @@ public class MyGame extends VariableFrameRateGame {
         carController = new CarController(avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire, protClient, isMultiplayerMode);
 
         controlActions();
-
-        // rotation controller
-        rc = new RotationController(engine, new Vector3f(0, 1, 0), 0.001f);
-        (engine.getSceneGraph()).addNodeController(rc);
-
-        // jump controller
-        jc = new JumpController(engine);
-        jc.addTarget(house);
-        (engine.getSceneGraph()).addNodeController(jc);
     }
 
     @Override
@@ -255,9 +240,11 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
 
         // tall building hitbox
-        float[] buildSize = {4.05f, 20f, 4.05f};
+        float[] buildSize = {4.05f, 16f, 4.05f};
+        Vector3f visualLoc = tallBuilding.getWorldLocation();
+        Vector3f hitboxLoc = new Vector3f(visualLoc.x, visualLoc.y + 8f, visualLoc.z);
         (engine.getSceneGraph()).addPhysicsBox(
-            0.0f, tallBuilding.getWorldLocation(), new Quaternionf(), buildSize);
+            0.0f, hitboxLoc, new Quaternionf(), buildSize);
 
         // box for the car
         PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
@@ -265,9 +252,6 @@ public class MyGame extends VariableFrameRateGame {
         avatar.setPhysicsObject(carPhysics);
         carPhysics.disableSleeping();
         carPhysics.setBounciness(0.3f);
-
-        //engine.enableGraphicsWorldRender();
-        //engine.enablePhysicsWorldRender();
     }
 
     @Override
@@ -359,7 +343,7 @@ public class MyGame extends VariableFrameRateGame {
         int vrX = (int) (width * vr.getRelativeLeft() + 10);
         int vrY = (int) (height * (vr.getRelativeBottom() + vr.getRelativeHeight()) - 30);
 
-        // dolphin's world coordinates
+        // avatars world coordinates
         Vector3f avatarLoc = avatar.getWorldLocation();
         int xloc = (int) avatarLoc.x;
         int zloc = (int) avatarLoc.z;
@@ -406,20 +390,24 @@ public class MyGame extends VariableFrameRateGame {
                     break;
                 case KeyEvent.VK_R:
                     protClient.sendReadyMessage();
-
                     break;
                 case KeyEvent.VK_T:
                     toggleRecenter();
                     break;
-
                 case KeyEvent.VK_C:
                  zombieS.stopAnimation();
                     zombieS.playAnimation("RUN", 0.45f,
                             AnimatedShape.EndType.LOOP, 0);
                     break;
-
+                case KeyEvent.VK_SPACE:
+                    if (!showPhysics) {
+                        engine.enablePhysicsWorldRender();
+                        showPhysics = true;
+                    } else {
+                        engine.disablePhysicsWorldRender();
+                        showPhysics = false;
+                    }
             }
-
         }
         super.keyPressed(e);
     }
@@ -601,7 +589,7 @@ public class MyGame extends VariableFrameRateGame {
         int centerX = (int) (left + width / 2.0f);
         int centerY = (int) (bottom - height / 2.0f);
         isRecentering = true;
-        robot.mouseMove((int) centerX, (int) centerY);
+        robot.mouseMove(centerX, centerY);
     }
 
     @Override
@@ -667,12 +655,10 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
-    public void readyPlayerUp(){}
-
     private class SendCloseConnectionPacketAction extends AbstractInputAction
     {	@Override
     public void performAction(float time, net.java.games.input.Event evt)
-    {	if(protClient != null && isClientConnected == true)
+    {	if(protClient != null && isClientConnected)
     {	protClient.sendByeMessage();
     }
     }
