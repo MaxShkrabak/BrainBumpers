@@ -17,7 +17,7 @@ public class MoveToAvatar extends BTAction {
 
     @Override
     protected BTStatus update(float elapsedTime) {
-        Vector3f currAvatarLoc = server.sendAvatarLocation();
+        Vector3f currAvatarLoc = server.sendAvatarLocation(npc);
         Vector3f currNPCLoc = new Vector3f((float) npc.getX(), (float) npc.getY(), (float) npc.getZ());
 
         Vector3f direction = new Vector3f();

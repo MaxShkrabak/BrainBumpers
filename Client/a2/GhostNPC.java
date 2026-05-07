@@ -5,6 +5,8 @@ import org.joml.Matrix4f;
 import tage.*;
 import tage.shapes.AnimatedShape;
 
+import java.util.UUID;
+
 public class GhostNPC extends GameObject {
     private int id;
     public GhostNPC(int id, AnimatedShape s, TextureImage t, Vector3f p, float scale)
@@ -14,6 +16,7 @@ public class GhostNPC extends GameObject {
         this.setLocalScale(new Matrix4f().scaling(scale));
     }
 
+    public int getID() { return id; }
     public void setPosition(Vector3f p) {
         this.setLocalLocation(p);
     }

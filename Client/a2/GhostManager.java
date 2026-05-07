@@ -9,15 +9,50 @@ import java.util.Vector;
 import org.joml.*;
 
 import tage.*;
+import tage.shapes.AnimatedShape;
 
 public class GhostManager
 {
 	private MyGame game;
 	private Vector<GhostAvatar> ghostAvatars = new Vector<GhostAvatar>();
+	private Vector<GhostNPC> ghostNPCs = new Vector<GhostNPC>();
 
 	public GhostManager(VariableFrameRateGame vfrg)
 	{	game = (MyGame)vfrg;
 	}
+
+	public void createGhostNPC(int id, Vector3f position) throws IOException
+	{
+		System.out.println("[SERVER]: Adding NPC with ID --> " + id);
+		AnimatedShape s = game.getNPCShape();
+		TextureImage t = game.getNPCTexture();
+		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0.4f);
+		ghostNPCs.add(newNPC);
+	}
+
+	public void updateGhostNPC(int id, Vector3f position, double gsize) throws IOException
+	{
+		boolean gs;
+		GhostNPC ghostNPC = findNPC(id);
+
+        assert ghostNPC != null;
+        ghostNPC.setPosition(position);
+		//if (gsize == 1.0) gs=false; else gs=true;
+		//ghostNPC.setSize(gs);
+	}
+
+	private GhostNPC findNPC(int id)
+	{	GhostNPC ghostNPC;
+		Iterator<GhostNPC> it = ghostNPCs.iterator();
+		while(it.hasNext())
+		{	ghostNPC= it.next();
+			if(ghostNPC.getID() == id)
+			{	return ghostNPC;
+			}
+		}
+		return null;
+	}
+
 	
 	public void createGhostAvatar(UUID id, Vector3f position, Matrix4f rotation) throws IOException
 	{	System.out.println("[SERVER]: Adding ghost with ID --> " + id);
@@ -29,7 +64,7 @@ public class GhostManager
 		newAvatar.setLocalRotation(rotation);
 		ghostAvatars.add(newAvatar);
 	}
-	
+
 	public void removeGhostAvatar(UUID id)
 	{	GhostAvatar ghostAvatar = findAvatar(id);
 		if(ghostAvatar != null)

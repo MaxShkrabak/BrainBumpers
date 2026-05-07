@@ -3,17 +3,20 @@ public class NPC {
     double locationX, locationY, locationZ;
     double dir = 0.1;
     double size = 1.0;
+    private int id;
 
-    public NPC() {
+    public NPC(int id) {
+        this.id = id;
         locationX=0.0;
         locationY=0.0;
         locationZ=0.0;
     }
+    public int getID(){return id;}
 
     public void randomizeLocation(int seedX, int seedZ) {
-        locationX = ((double)seedX)/4.0 - 5.0;
+        locationX = ((double)seedX)/4.0;
         locationY = 0;
-        locationZ = -2;
+        locationZ = seedZ;
     }
 
     public double getX() { return locationX; }

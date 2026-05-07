@@ -74,12 +74,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						gameStarted = true;
 						System.out.println("[SERVER] All players have readied up, starting game!");
 						startGameMessage();
-						String[] pos1 = {"2.0", "0.0", "5.0"};
-						//String[] pos2 = {"4.0", "2.0", "10.0"};
-						//String[] pos3 = {"-5.0", "0.0", "-5.0"};
-						sendCreateNPCmsg(pos1);
-						//sendCreateNPCmsg(pos2);
-						//sendCreateNPCmsg(pos3);
+
+						sendCreateNPCmsg();
+						sendCreateNPCmsg();
+						sendCreateNPCmsg();
 					}
 				}
 			}
@@ -159,15 +157,15 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// NPC STUFF
 
 	// --- additional protocol for NPCs ----
-	public void sendCheckForAvatarNear()
+	public void sendCheckForAvatarNear(NPC npc)
 	{
 		try
 		{
 			String message = new String("isnr");
-			message += "," + (npcCtrl.getNPC()).getX();
-			message += "," + (npcCtrl.getNPC()).getY();
-			message += "," + (npcCtrl.getNPC()).getZ();
-			message += "," + (npcCtrl.getCriteria());
+			message += "," + npc.getX();
+			message += "," + npc.getY();
+			message += "," + npc.getZ();
+			message += "," + npcCtrl.getCriteria();
 			sendPacketToAll(message);
 		}
 		catch (IOException e)
@@ -175,9 +173,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	}
 
 	// get current avatar location
-	public Vector3f sendAvatarLocation() {
+	public Vector3f sendAvatarLocation(NPC npc) {
 
-		String[] goHere = findClosest(curPositions, npcCtrl.getNPC().getLocation());
+		String[] goHere = findClosest(curPositions, npc.getLocation());
 		if(goHere !=null) {
 			float x = Float.parseFloat(goHere[0]);
 			float y = Float.parseFloat(goHere[1]);
@@ -211,13 +209,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		return closestCoord;
 	}
 
-	public void sendNPCinfo()
+	public void sendNPCinfo(NPC npc)
 	{
 		try {
-			String message = "updateNPC";
-			message += "," + npcCtrl.getNPC().getX();
-			message += "," + npcCtrl.getNPC().getY();
-			message += "," + npcCtrl.getNPC().getZ();
+			String message = "updateNPC," + npc.getID();
+			message += "," + npc.getX();
+			message += "," + npc.getY();
+			message += "," + npc.getZ();
 
 			sendPacketToAll(message);
 		} catch (IOException e) {
@@ -238,17 +236,17 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 	// ------------ SENDING NPC MESSAGES -----------------
 	// Informs clients of the whereabouts of the NPCs.
-	public void sendCreateNPCmsg(String[] position)
+	public void sendCreateNPCmsg()
 	{
 		try
 		{
+			NPC npc = npcCtrl.spawnNPC();
 			System.out.println("server telling clients about an NPC");
-			String message = new String("createNPC");
-			message += "," + position[0];
-			message += "," + position[1];
-			message += "," + position[2];
+			String message = new String("createNPC," + npc.getID());
+			message += "," + npc.getX();
+			message += "," + npc.getY();
+			message += "," + npc.getZ();
 			sendPacketToAll(message);
-			System.out.println("printing this to client: " + message);
 
 		} catch (IOException e) {
 			e.printStackTrace();

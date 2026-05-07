@@ -1,4 +1,7 @@
+import java.util.Arrays;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.joml.Vector3f;
 import tage.*;
@@ -8,18 +11,24 @@ import tage.ai.behaviortrees.BehaviorTree;
 
 public class NPCcontroller {
 
-    private NPC npc;
+    private List<NPC> npcs = new ArrayList<>();
+    private List<BehaviorTree> behaviorTrees = new ArrayList<>();
+
     Random rn = new Random();
-    BehaviorTree bt = new BehaviorTree(BTCompositeType.SELECTOR);
     boolean nearFlag = false;
     long thinkStartTime, tickStartTime, lastThinkUpdateTime, lastTickUpdateTime;
     GameServerUDP server;
     double criteria = 2.0;
     Vector3f carPos;
 
-    public void updateNPCs()
-    {
-        npc.updateLocation();
+    public void updateNPCs() {
+        //System.out.println("printing count of npcs: " + npcs.size());
+        if (!npcs.isEmpty()) {
+            for (int i = 0; i < npcs.size(); i++) {
+                server.sendNPCinfo(npcs.get(i));
+                //System.out.println("sending info for id: " + i);
+            }
+        }
     }
 
     public void start(GameServerUDP s)
@@ -29,15 +38,23 @@ public class NPCcontroller {
         lastThinkUpdateTime = thinkStartTime;
         lastTickUpdateTime = tickStartTime;
         server = s;
-        setupNPCs();
-        setupBehaviorTree();
         npcLoop();
     }
 
-    public void setupNPCs()
+    public NPC spawnNPC()
     {
-        npc = new NPC();
-        npc.randomizeLocation(rn.nextInt(10),rn.nextInt(10));
+        int nextNPCcount = npcs.size()+1;
+        NPC npc = new NPC(nextNPCcount);
+        npc.randomizeLocation(rn.nextInt(40), rn.nextInt(15));
+        npcs.add(npc);
+
+        System.out.println("spawned an npc at: " + Arrays.toString(npc.getLocation()));
+        BehaviorTree bt = new BehaviorTree(BTCompositeType.SELECTOR);
+        bt.insertAtRoot(new BTSequence(10));
+        bt.insert(10, new MoveToAvatar(server, this, npc));
+        behaviorTrees.add(bt);
+
+        return npc;
     }
 
     public void npcLoop()
@@ -49,36 +66,43 @@ public class NPCcontroller {
             float elapsedTickMilliSecs =
                     (currentTime-lastTickUpdateTime)/(1000000.0f);
 
-            if (elapsedTickMilliSecs >= 25.0f)
-            {
+            if (elapsedTickMilliSecs >= 25.0f) {
                 lastTickUpdateTime = currentTime;
-                npc.updateLocation();
-                server.sendNPCinfo();
+                for (NPC npc : npcs) {
+                    npc.updateLocation();
+                }
+                updateNPCs();
             }
 
-            if (elapsedThinkMilliSecs >= 250.0f)
-            {
+            if (elapsedThinkMilliSecs >= 250.0f) {
                 lastThinkUpdateTime = currentTime;
-                bt.update(elapsedThinkMilliSecs);
+                for (BehaviorTree bt : behaviorTrees) {
+                    bt.update(elapsedThinkMilliSecs);
+                }
             }
 
             Thread.yield();
         }
     }
 
-    public void setupBehaviorTree()
-    {
-        bt.insertAtRoot(new BTSequence(10));
-        //bt.insertAtRoot(new BTSequence(20));
-        //bt.insert(10, new AvatarNear(server,this,npc,false));
-        bt.insert(10, new MoveToAvatar(server,this,npc));
-        //bt.insert(10, new GetSmall(npc));
-        //bt.insert(20, new AvatarNear(server,this,npc,false));
-        //bt.insert(20, new GetBig(npc));
+//    public void setupBehaviorTree()
+//    {
+//        bt.insertAtRoot(new BTSequence(10));
+//        //bt.insertAtRoot(new BTSequence(20));
+//        //bt.insert(10, new AvatarNear(server,this,npc,false));
+//        bt.insert(10, new MoveToAvatar(server,this,npc));
+//        //bt.insert(10, new GetSmall(npc));
+//        //bt.insert(20, new AvatarNear(server,this,npc,false));
+//        //bt.insert(20, new GetBig(npc));
+//    }
+
+    public NPC getNPC(int index) {
+        return npcs.get(index);
     }
 
-    public NPC getNPC() {
-        return npc;
+    // Get all NPCs
+    public List<NPC> getNPCs() {
+        return npcs;
     }
 
     public double getCriteria() {
