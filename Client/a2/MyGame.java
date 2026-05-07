@@ -62,7 +62,7 @@ public class MyGame extends VariableFrameRateGame {
     private boolean isRecentering;
     private boolean mouseModeInitiated = false;
 
-    private int lakeIslands;
+    private int skybox;
 
     private CarController carController;
 
@@ -108,8 +108,8 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadSkyBoxes()
-    {	lakeIslands = (engine.getSceneGraph()).loadCubeMap("lakeIslands");
-        (engine.getSceneGraph()).setActiveSkyBoxTexture(lakeIslands);
+    {	skybox = (engine.getSceneGraph()).loadCubeMap("skybox");
+        (engine.getSceneGraph()).setActiveSkyBoxTexture(skybox);
         (engine.getSceneGraph()).setSkyBoxEnabled(true);
     }
 
