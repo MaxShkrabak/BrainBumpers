@@ -13,6 +13,7 @@ import java.lang.Math;
 import java.awt.event.*;
 import org.joml.*;
 import javax.swing.*;
+import tage.audio.*;
 
 import tage.networking.IGameConnection.ProtocolType;
 import tage.physics.PhysicsObject;
@@ -72,6 +73,9 @@ public class MyGame extends VariableFrameRateGame {
     private ProtocolClient protClient;
     private boolean isClientConnected = false;
 
+    private IAudioManager audioMgr;
+    private Sound carEngineSound, ambientSound;
+
     public MyGame(String serverAddress, int serverPort, String protocol)
     {	super();
         gm = new GhostManager(this);
@@ -107,6 +111,24 @@ public class MyGame extends VariableFrameRateGame {
     {	lakeIslands = (engine.getSceneGraph()).loadCubeMap("lakeIslands");
         (engine.getSceneGraph()).setActiveSkyBoxTexture(lakeIslands);
         (engine.getSceneGraph()).setSkyBoxEnabled(true);
+    }
+
+    @Override
+    public void loadSounds()
+    { AudioResource resource1, resource2;
+        audioMgr = engine.getAudioManager();
+        resource1 = audioMgr.createAudioResource("carEngine.wav", AudioResourceType.AUDIO_SAMPLE);
+        resource2 = audioMgr.createAudioResource("creepy.wav", AudioResourceType.AUDIO_SAMPLE);
+        carEngineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 50, true);
+        ambientSound = new Sound(resource2, SoundType.SOUND_EFFECT, 15, true);
+        carEngineSound.initialize(audioMgr);
+        ambientSound.initialize(audioMgr);
+        carEngineSound.setMaxDistance(10.0f);
+        carEngineSound.setMinDistance(0.5f);
+        carEngineSound.setRollOff(5.0f);
+        ambientSound.setMaxDistance(10.0f);
+        ambientSound.setMinDistance(0.5f);
+        ambientSound.setRollOff(5.0f);
     }
 
     @Override
@@ -226,7 +248,23 @@ public class MyGame extends VariableFrameRateGame {
 
         carController = new CarController(avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire, protClient, isMultiplayerMode);
 
+        carEngineSound.setLocation(avatar.getWorldLocation());
+        ambientSound.setLocation(tallBuilding.getWorldLocation());
+        setEarParameters();
+        carEngineSound.play();
+        ambientSound.play();
+
         controlActions();
+    }
+
+    public void setEarParameters() {
+        Viewport vp = engine.getRenderSystem().getViewport("LEFT");
+        if (vp != null) {
+            Camera camera = vp.getCamera();
+
+            audioMgr.getEar().setLocation(camera.getLocation());
+            audioMgr.getEar().setOrientation(camera.getN(), camera.getV());
+        }
     }
 
     @Override
@@ -278,6 +316,14 @@ public class MyGame extends VariableFrameRateGame {
 
             (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
 
+            // engine pitch
+            float speed = Math.abs(carController.getCurrentSpeed());
+            float maxSpeed = 14.0f; // Matches MAX_SPEED in CarController
+
+            // starts pitch at 1.0 (idle) and reaches 2.0 at max speed
+            float enginePitch = 1.0f + (speed / maxSpeed);
+            carEngineSound.setPitch(enginePitch);
+
             if (carPhysics != null) {
                 Vector3f physLoc = carPhysics.getLocation();
                 avatar.setLocalLocation(new Vector3f(physLoc.x, physLoc.y, physLoc.z));
@@ -286,7 +332,16 @@ public class MyGame extends VariableFrameRateGame {
                 avatar.getWorldRotation().getNormalizedRotation(avatarRot);
                 carPhysics.setTransform(physLoc, avatarRot);
                 carPhysics.setAngularVelocity(new float[]{0f, 0f, 0f});
+
+                float[] v = carPhysics.getLinearVelocity();
+                carEngineSound.setVelocity(new Vector3f(v[0], v[1], v[2]));
             }
+
+            // Update positions
+            carEngineSound.setLocation(avatar.getWorldLocation());
+            ambientSound.setLocation(tallBuilding.getWorldLocation());
+
+            setEarParameters();
 
             orbitController.updateCameraPosition();
         }
