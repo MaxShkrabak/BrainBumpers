@@ -24,6 +24,14 @@ public class NPC {
     public void setY(double y) { locationY = y; }
     public void setZ(double z) { locationZ = z;}
 
+    public String[] getLocation() {
+        return new String[]{
+                String.valueOf(locationX),
+                String.valueOf(locationY),
+                String.valueOf(locationZ)
+        };
+    }
+
     public void getBig() { size=2.0; }
     public void getSmall() { size=1.0; }
     public double getSize() { return size; }

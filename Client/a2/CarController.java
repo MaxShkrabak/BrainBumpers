@@ -79,9 +79,7 @@ public class CarController {
             float vertVel = Math.min(curVel[1], 0f); // to help prevent collision climbing
             physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, vertVel, fwd.z() * currentSpeed});
 
-            System.out.println("Checking car controller line 81");
-            if (isMultiplayer && protClient != null){ System.out.println("Checking car controller line 82"); protClient.sendMoveMessage(avatar.getWorldLocation());}
-            System.out.println("Checking car controller line 83");
+            if (isMultiplayer && protClient != null) protClient.sendMoveMessage(avatar.getWorldLocation());
         }
 
         // spin tires based on speed

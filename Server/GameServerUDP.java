@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Map;
 import java.util.UUID;
 import java.util.HashMap;
 
@@ -13,7 +14,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 	private static final int MIN_PLAYERS = 1;
 	private boolean gameStarted = false;
-	private String[] curPos = {"0", "0", "0"};
+	private HashMap<UUID, String[]> curPositions = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 
 	public GameServerUDP(int localPort, NPCcontroller npcCtrl) throws IOException
@@ -45,6 +46,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 						sendJoinedMessage(clientID, true);
 						readyStatus.put(clientID, false); // Store the connected user in the hashmap
+						curPositions.put(clientID, new String[]{"0","0","0"});
 					}
 				} 
 				catch (IOException e) 
@@ -72,7 +74,6 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						gameStarted = true;
 						System.out.println("[SERVER] All players have readied up, starting game!");
 						startGameMessage();
-						System.out.println("maybe spawning zombie idk");
 						String[] pos1 = {"2.0", "0.0", "5.0"};
 						//String[] pos2 = {"4.0", "2.0", "10.0"};
 						//String[] pos3 = {"-5.0", "0.0", "-5.0"};
@@ -120,7 +121,6 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			if(messageTokens[0].compareTo("move") == 0)
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
 				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
-				System.out.println("THIS IS CAR POS: " + pos[0] + " " + pos[1] + " " + pos[2]);
 				sendMoveMessages(clientID, pos);
 			}
 
@@ -177,11 +177,38 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// get current avatar location
 	public Vector3f sendAvatarLocation() {
 
-		float x = Float.parseFloat(curPos[0]);
-		float y = Float.parseFloat(curPos[1]);
-		float z = Float.parseFloat(curPos[2]);
+		String[] goHere = findClosest(curPositions, npcCtrl.getNPC().getLocation());
+		if(goHere !=null) {
+			float x = Float.parseFloat(goHere[0]);
+			float y = Float.parseFloat(goHere[1]);
+			float z = Float.parseFloat(goHere[2]);
+			//System.out.printf("following: %s, %s, %s \n", goHere[0],goHere[1],goHere[2]);
+			return new Vector3f(x, y, z);
+		}
+		return new Vector3f(0,0,0);
+	}
 
-		return new Vector3f(x, y, z);
+	private double squaredDistance(String[] coord1, String[] coord2) {
+		double dx = Double.parseDouble(coord2[0]) - Double.parseDouble(coord1[0]);
+		double dy = Double.parseDouble(coord2[1]) - Double.parseDouble(coord1[1]);
+		double dz = Double.parseDouble(coord2[2]) - Double.parseDouble(coord1[2]);
+
+		return dx*dx + dy*dy + dz*dz;
+	}
+	public String[] findClosest(HashMap<UUID, String[]> map, String[] target) {
+		String[] closestCoord = null;
+		double closestDistance = Double.MAX_VALUE;
+
+		for (Map.Entry<UUID, String[]> entry : map.entrySet()) {
+			double distance = squaredDistance(entry.getValue(), target);
+
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestCoord = entry.getValue();
+			}
+		}
+
+		return closestCoord;
 	}
 
 	public void sendNPCinfo()
@@ -350,10 +377,14 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			message += "," + position[0];
 			message += "," + position[1];
 			message += "," + position[2];
-			curPos[0] = position[0];
-			curPos[1] = position[1];
-			curPos[2] = position[2];
-			System.out.println(curPos[0] + " " + curPos[1] + " " + curPos[2]);// store the coordinates of car in server memory
+
+			String[] vals = curPositions.get(clientID);
+			vals[0] = position[0];
+			vals[1] = position[1];
+			vals[2] = position[2];
+			//System.out.println("putting this for " + clientID.toString() +
+					//": X:" + vals[0] + " Y:" + vals[1] + " Z:" + vals[2]);// store the coordinates of car in server memory
+
 			forwardPacketToAll(message, clientID);
 		} 
 		catch (IOException e) 
