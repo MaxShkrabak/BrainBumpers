@@ -170,14 +170,14 @@ public class MyGame extends VariableFrameRateGame {
         zombieT = new TextureImage("ZombieSkin.png");
 
         // building textures
-        tallBuildingT = new TextureImage("Texture_Yellow.png");
-        casinoT = new TextureImage("Texture_Casino.png");
-        casinoSignT = new TextureImage("Texture_Signs.png");
+        tallBuildingT = new TextureImage("YlwBuildingTexture.png");
+        casinoT = new TextureImage("CasinoTexture.png");
+        casinoSignT = new TextureImage("SignsTexture.png");
 
 
         // terrain textures
-        hills = new TextureImage("cityMap.png");    // height map
-        road = new TextureImage("cityTexture.png"); // painted terrain
+        hills = new TextureImage("CityMap.png");    // height map
+        road = new TextureImage("CityTexture.png"); // painted terrain
     }
 
     @Override
