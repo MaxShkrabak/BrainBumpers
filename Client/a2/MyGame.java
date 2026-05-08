@@ -36,15 +36,15 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, terr;
     private GameObject x, y, z; // world axes
-    private GameObject tallBuilding;
+    private GameObject tallBuilding, casino, casinoSign;
 
     private AnimatedShape zombieS;
     private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS;
     private ObjShape linxS, linyS, linzS;
-    private ObjShape tallBuildingS;
+    private ObjShape tallBuildingS, casinoS, casinoSignS;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
-    private TextureImage tallBuildingT;
+    private TextureImage tallBuildingT, casinoT, casinoSignT;
 
     private Light light1, moonLight;
 
@@ -152,6 +152,8 @@ public class MyGame extends VariableFrameRateGame {
 
         // building shapes
         tallBuildingS = new ImportedModel("TallBuilding.obj");
+        casinoS = new ImportedModel("Casino.obj");
+        casinoSignS = new ImportedModel("CasinoSign.obj");
 
         // terrain shape
         terrS = new TerrainPlane(200); // pixels per axis = 200x200
@@ -169,6 +171,9 @@ public class MyGame extends VariableFrameRateGame {
 
         // building textures
         tallBuildingT = new TextureImage("Texture_Yellow.png");
+        casinoT = new TextureImage("Texture_Casino.png");
+        casinoSignT = new TextureImage("Texture_Signs.png");
+
 
         // terrain textures
         hills = new TextureImage("cityMap.png");    // height map
@@ -202,6 +207,8 @@ public class MyGame extends VariableFrameRateGame {
 
         // buildings
         tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, 25f, 0f, 14f, 2f, 0f);
+        casino = spawnObject(GameObject.root(), casinoS, casinoT, 50f, 0f, 32f, 2f, 0f);
+        casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0, 0f, 0f, 1f, 0f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
@@ -267,24 +274,40 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
+    // Helper to add a hitbox around a stationary object
+    private void addHitbox(GameObject obj, float w, float h, float d, float xO, float yO, float zO) {
+        float[] size = {w, h, d};
+        Vector3f loc = obj.getWorldLocation();
+
+        // location + offset
+        Vector3f finalLoc = new Vector3f(loc.x + xO, loc.y + yO, loc.z + zO);
+
+        (engine.getSceneGraph()).addPhysicsBox(0.0f, finalLoc, new Quaternionf(), size);
+    }
+
     @Override
     public void initializePhysicsObjects() {
-        float[] carSize = {0.5f, 0.3f, 1.25f};
-
         // terrain mesh
         (engine.getSceneGraph()).addPhysicsStaticTerrainMesh(
             new Vector3f(0f, 0f, 0f), new Quaternionf(), hills, 100.0f, 15.0f, 200);
 
         (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
 
-        // tall building hitbox
-        float[] buildSize = {4.05f, 16f, 4.05f};
-        Vector3f visualLoc = tallBuilding.getWorldLocation();
-        Vector3f hitboxLoc = new Vector3f(visualLoc.x, visualLoc.y + 8f, visualLoc.z);
-        (engine.getSceneGraph()).addPhysicsBox(
-            0.0f, hitboxLoc, new Quaternionf(), buildSize);
+        // Tall building
+        addHitbox(tallBuilding, 4.05f, 16f, 4.05f, 0f, 8f, 0f);
+        addHitbox(tallBuilding, 1.3f, 1f, 0.7f, 0f, 0.5f, 2.5f); // Steps
 
-        // box for the car
+        // Casino building
+        addHitbox(casino, 13.3f, 10f, 4.05f, 0f, 5f, 0f);
+        addHitbox(casino, 1.7f, 2f, 0.8f, -1.65f, 1.0f, 2.0f); // Left steps
+        addHitbox(casino, 1.7f, 2f, 0.8f,  1.65f, 1.0f, 2.0f); // Right steps
+        addHitbox(casino, 0.1f, 2f, 0.1f, -2.3f, 1.0f, 3.12f); // Left-Left pillar
+        addHitbox(casino, 0.1f, 2f, 0.1f, -1.0f, 1.0f, 3.12f); // Left-Right pillar
+        addHitbox(casino, 0.1f, 2f, 0.1f,  1.0f, 1.0f, 3.12f); // Right-Left pillar
+        addHitbox(casino, 0.1f, 2f, 0.1f,  2.3f, 1.0f, 3.12f); // Right-Right pillar
+
+        // car hitbox
+        float[] carSize = {0.5f, 0.3f, 1.25f};
         PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
             300.0f, avatar.getWorldLocation(), new Quaternionf(), carSize);
         avatar.setPhysicsObject(carPhysics);
