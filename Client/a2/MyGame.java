@@ -467,7 +467,9 @@ public class MyGame extends VariableFrameRateGame {
                     }
                     break;
                 case KeyEvent.VK_R:
-                    protClient.sendReadyMessage();
+                    if (isMultiplayerMode) {
+                        protClient.sendReadyMessage();
+                    }
                     break;
                 case KeyEvent.VK_T:
                     toggleRecenter();
