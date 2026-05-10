@@ -14,7 +14,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	NPCcontroller npcCtrl;
 
 	private static final int MIN_PLAYERS = 1;
-	private boolean gameStarted = false;
+	private boolean gameStarted = false, isSpawning = false;
 	private HashMap<UUID, String[]> curPositions = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 
@@ -158,6 +158,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// --- additional protocol for NPCs ----
 
 	public void beginWave() {
+		isSpawning = true;
 		Random rn = new Random();
 		int genWave = rn.nextInt(3,5) * getClients().size();
 
@@ -168,9 +169,14 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			}
 			String message = new String("wave," + genWave);
 			sendPacketToAll(message);
-		} catch (IOException e)
-		{ System.out.println("couldnt start wave"); e.printStackTrace(); }
-
+		} catch (IOException e) {
+			System.out.println("couldnt start wave"); e.printStackTrace(); }
+		finally {
+			isSpawning = false;
+		}
+	}
+	public boolean getIsSpawning(){
+		return isSpawning;
 	}
 	public void sendCheckForAvatarNear(NPC npc)
 	{

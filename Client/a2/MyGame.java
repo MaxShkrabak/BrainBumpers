@@ -119,13 +119,17 @@ public class MyGame extends VariableFrameRateGame {
         audioMgr = engine.getAudioManager();
         resource1 = audioMgr.createAudioResource("carEngine.wav", AudioResourceType.AUDIO_SAMPLE);
         resource2 = audioMgr.createAudioResource("creepy.wav", AudioResourceType.AUDIO_SAMPLE);
+
         carEngineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 50, true);
         ambientSound = new Sound(resource2, SoundType.SOUND_EFFECT, 15, true);
+
         carEngineSound.initialize(audioMgr);
         ambientSound.initialize(audioMgr);
+
         carEngineSound.setMaxDistance(10.0f);
         carEngineSound.setMinDistance(0.5f);
         carEngineSound.setRollOff(5.0f);
+
         ambientSound.setMaxDistance(10.0f);
         ambientSound.setMinDistance(0.5f);
         ambientSound.setRollOff(5.0f);

@@ -4,11 +4,11 @@ public class NPC {
     double locationX, locationY, locationZ;
     double size = 1.0;
     private int id;
+    private Vector3f target = null;
     private float rotationY = 0.0f;
     private float targetRotationY = 0.0f;
     private static final float TURN_SPEED = 10.0f;
-    private Vector3f target = null;
-    private static final float SPEED = 0.0055f; // tune this
+    private static final float SPEED = 0.0045f; // tune this
 
     public NPC(int id) {
         this.id = id;
