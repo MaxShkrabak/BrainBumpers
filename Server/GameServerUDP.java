@@ -1,9 +1,6 @@
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-import java.util.HashMap;
+import java.util.*;
 
 import org.joml.Vector3f;
 import tage.networking.server.GameConnectionServer;
@@ -228,6 +225,18 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		}
 
 		return closestCoord;
+	}
+
+	public List<Vector3f> getAllAvatarPositions() {
+		List<Vector3f> positions = new ArrayList<>();
+		for (String[] pos : curPositions.values()) {
+			positions.add(new Vector3f(
+					Float.parseFloat(pos[0]),
+					Float.parseFloat(pos[1]),
+					Float.parseFloat(pos[2])
+			));
+		}
+		return positions;
 	}
 
 	public void sendNPCinfo(NPC npc)

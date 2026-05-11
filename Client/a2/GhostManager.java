@@ -26,6 +26,8 @@ public class GhostManager
 		TextureImage t = game.getNPCTexture();
 		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0, 0.08f);
 		ghostNPCs.add(newNPC);
+
+		game.initializeNPCPhysics(newNPC);
 	}
 
 	public void updateGhostNPC(int id, String[] position, float rot) throws IOException
@@ -55,6 +57,10 @@ public class GhostManager
 			}
 		}
 		return null;
+	}
+
+	public Vector<GhostNPC> getGhostNPCs() {
+		return ghostNPCs;
 	}
 
 	
@@ -90,6 +96,10 @@ public class GhostManager
 			}
 		}		
 		return null;
+	}
+
+	private Vector<GhostAvatar> getGhostAvatars() {
+		return ghostAvatars;
 	}
 	
 	public void updateGhostAvatarPosition(UUID id, Vector3f position)

@@ -279,14 +279,14 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     // Helper to add a hitbox around a stationary object
-    private void addHitbox(GameObject obj, float w, float h, float d, float xO, float yO, float zO) {
+    private void addHitbox(GameObject obj, float m, float w, float h, float d, float xO, float yO, float zO) {
         float[] size = {w, h, d};
         Vector3f loc = obj.getWorldLocation();
 
         // location + offset
         Vector3f finalLoc = new Vector3f(loc.x + xO, loc.y + yO, loc.z + zO);
 
-        (engine.getSceneGraph()).addPhysicsBox(0.0f, finalLoc, new Quaternionf(), size);
+        (engine.getSceneGraph()).addPhysicsBox(m, finalLoc, new Quaternionf(), size);
     }
 
     @Override
@@ -298,25 +298,41 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
 
         // Tall building
-        addHitbox(tallBuilding, 4.05f, 16f, 4.05f, 0f, 8f, 0f);
-        addHitbox(tallBuilding, 1.3f, 1f, 0.7f, 0f, 0.5f, 2.5f); // Steps
+        addHitbox(tallBuilding, 0, 4.05f, 16f, 4.05f, 0f, 8f, 0f);
+        addHitbox(tallBuilding, 0, 1.3f, 1f, 0.7f, 0f, 0.5f, 2.5f); // Steps
 
         // Casino building
-        addHitbox(casino, 13.3f, 10f, 4.05f, 0f, 5f, 0f);
-        addHitbox(casino, 1.7f, 2f, 0.8f, -1.65f, 1.0f, 2.0f); // Left steps
-        addHitbox(casino, 1.7f, 2f, 0.8f,  1.65f, 1.0f, 2.0f); // Right steps
-        addHitbox(casino, 0.1f, 2f, 0.1f, -2.3f, 1.0f, 3.12f); // Left-Left pillar
-        addHitbox(casino, 0.1f, 2f, 0.1f, -1.0f, 1.0f, 3.12f); // Left-Right pillar
-        addHitbox(casino, 0.1f, 2f, 0.1f,  1.0f, 1.0f, 3.12f); // Right-Left pillar
-        addHitbox(casino, 0.1f, 2f, 0.1f,  2.3f, 1.0f, 3.12f); // Right-Right pillar
+        addHitbox(casino, 0, 13.3f, 10f, 4.05f, 0f, 5f, 0f);
+        addHitbox(casino, 0, 1.7f, 2f, 0.8f, -1.65f, 1.0f, 2.0f); // Left steps
+        addHitbox(casino, 0, 1.7f, 2f, 0.8f,  1.65f, 1.0f, 2.0f); // Right steps
+        addHitbox(casino, 0, 0.1f, 2f, 0.1f, -2.3f, 1.0f, 3.12f); // Left-Left pillar
+        addHitbox(casino, 0, 0.1f, 2f, 0.1f, -1.0f, 1.0f, 3.12f); // Left-Right pillar
+        addHitbox(casino, 0, 0.1f, 2f, 0.1f,  1.0f, 1.0f, 3.12f); // Right-Left pillar
+        addHitbox(casino, 0, 0.1f, 2f, 0.1f,  2.3f, 1.0f, 3.12f); // Right-Right pillar
 
         // car hitbox
         float[] carSize = {0.5f, 0.3f, 1.25f};
         PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
-            300.0f, avatar.getWorldLocation(), new Quaternionf(), carSize);
+            1.0f, avatar.getWorldLocation(), new Quaternionf(), carSize);
         avatar.setPhysicsObject(carPhysics);
         carPhysics.disableSleeping();
-        carPhysics.setBounciness(0.3f);
+        carPhysics.setBounciness(0.15f);
+    }
+
+    public void initializeNPCPhysics(GhostNPC ghostNPC) {
+        // float[] npcSize = {0.3f, 0.6f, 0.3f}; // adjust to match your zombie model size
+        Vector3f spawnPos = ghostNPC.getWorldLocation();
+        spawnPos.add(0, 0.3f,0);
+
+        PhysicsObject npcPhysics = (engine.getSceneGraph()).addPhysicsCapsule(
+                0.0f,                          // mass — lighter than car
+                spawnPos,
+                new Quaternionf(),
+                1,.2f,.25f
+        );
+        ghostNPC.setPhysicsObject(npcPhysics);
+        npcPhysics.disableSleeping();
+        npcPhysics.setBounciness(0.1f);
     }
 
     @Override

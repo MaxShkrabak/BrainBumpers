@@ -1,5 +1,7 @@
 import org.joml.Vector3f;
 
+import java.util.List;
+
 public class NPC {
     double locationX, locationY, locationZ;
     double size = 1.0;
@@ -8,7 +10,7 @@ public class NPC {
     private float rotationY = 0.0f;
     private float targetRotationY = 0.0f;
     private static final float TURN_SPEED = 10.0f;
-    private static final float SPEED = 0.0045f; // tune this
+    private static final float SPEED = 0.0035f;
 
     public NPC(int id) {
         this.id = id;
@@ -49,24 +51,67 @@ public class NPC {
     public double getSize() { return size; }
     public float getRotationY() { return rotationY; }
 
-    public void updateLocation() {
-        if (target == null) return;
+    public void updateLocation(List<NPC> allNPCs, List<Vector3f> allAvatarPositions) {
 
-        Vector3f currLoc = new Vector3f((float) locationX, (float) locationY, (float) locationZ);
-        Vector3f direction = new Vector3f();
-        target.sub(currLoc, direction);
+        // move to avatar
+        if (target != null) {
+            Vector3f currLoc = new Vector3f((float) locationX, 0, (float) locationZ);
+            Vector3f direction = new Vector3f();
+            Vector3f targetFlat = new Vector3f(target.x, 0, target.z);
+            targetFlat.sub(currLoc, direction);
 
-        if (direction.length() < 0.01f) return; // close enough, stop
+            if (direction.length() >= 0.01f) {
+                targetRotationY = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
+                rotationY = lerpAngle(rotationY, targetRotationY, TURN_SPEED);
 
-        targetRotationY = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
-        rotationY = lerpAngle(rotationY, targetRotationY, TURN_SPEED);
+                float rad = (float) Math.toRadians(rotationY);
+                locationX += Math.sin(rad) * SPEED * 30.0f;
+                locationZ += Math.cos(rad) * SPEED * 30.0f;
+            }
+        }
 
-        direction.normalize();
-        direction.mul(SPEED * 30.0f);
+        // separate from other zombies
+        for (NPC other : allNPCs) {
+            if (other == this) continue;
+            Vector3f myPos = new Vector3f((float)locationX, 0, (float)locationZ);
+            Vector3f otherPos = new Vector3f((float)other.getX(), 0, (float)other.getZ());
+            float dist = myPos.distance(otherPos);
 
-        locationX += direction.x;
-        locationY = 0;
-        locationZ += direction.z;
+            // how close zombies stand next to each other
+            float zombieCollisionRadius = 0.6f;
+
+            if (dist < zombieCollisionRadius && dist > 0.001f) {
+                Vector3f push = new Vector3f();
+                myPos.sub(otherPos, push);
+                push.normalize();
+
+                float overlap = zombieCollisionRadius - dist;
+
+                locationX += push.x * (overlap * 0.5f);
+                locationZ += push.z * (overlap * 0.5f);
+            }
+        }
+
+        // dont walk past the avatar model
+        if (allAvatarPositions != null) {
+            for (Vector3f avatarPos : allAvatarPositions) {
+                Vector3f myPos = new Vector3f((float)locationX, 0, (float)locationZ);
+                Vector3f avatarFlat = new Vector3f(avatarPos.x, 0, avatarPos.z);
+
+                float dist = myPos.distance(avatarFlat);
+                float collisionRadius = 1f;
+
+                if (dist < collisionRadius && dist > 0.001f) {
+                    Vector3f push = new Vector3f();
+                    myPos.sub(avatarFlat, push);
+                    push.normalize();
+
+                    // clamp stuff
+                    locationX = avatarFlat.x + (push.x * collisionRadius);
+                    locationZ = avatarFlat.z + (push.z * collisionRadius);
+                }
+            }
+        }
     }
 
     // smoothly rotate instead of flicker

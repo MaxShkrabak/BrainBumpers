@@ -18,7 +18,6 @@ public class NPCcontroller {
     long thinkStartTime, tickStartTime, lastThinkUpdateTime, lastTickUpdateTime;
     GameServerUDP server;
     double criteria = 2.0;
-    Vector3f carPos;
 
     public void updateNPCs() {
         //System.out.println("printing count of npcs: " + npcs.size());
@@ -65,17 +64,19 @@ public class NPCcontroller {
             float elapsedTickMilliSecs =
                     (currentTime-lastTickUpdateTime)/(1000000.0f);
 
-            if (elapsedTickMilliSecs >= 25.0f) {
+            if (elapsedTickMilliSecs >= 35.0f) {
                 lastTickUpdateTime = currentTime;
-                for (NPC npc : npcs) {
-                    npc.updateLocation();
-                }
+                List<Vector3f> allAvatarPositions = server.getAllAvatarPositions();
+
                 if (!server.getIsSpawning()) {
+                    for (NPC npc : npcs) {
+                        npc.updateLocation(npcs, allAvatarPositions);
+                    }
                     updateNPCs();
                 }
             }
 
-            if (elapsedThinkMilliSecs >= 250.0f) {
+            if (elapsedThinkMilliSecs >= 200.0f) {
                 lastThinkUpdateTime = currentTime;
                 for (BehaviorTree bt : behaviorTrees) {
                     bt.update(elapsedThinkMilliSecs);
@@ -115,6 +116,5 @@ public class NPCcontroller {
     public void setNearFlag(boolean flag){
         nearFlag = flag;
     }
-    public void setCurAvatarPos(Vector3f pos){ carPos = pos;}
 
 }
