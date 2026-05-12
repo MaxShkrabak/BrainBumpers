@@ -7,6 +7,7 @@ import java.util.Vector;
 import org.joml.*;
 
 import tage.*;
+import tage.physics.PhysicsObject;
 import tage.shapes.AnimatedShape;
 
 public class GhostManager
@@ -27,23 +28,48 @@ public class GhostManager
 		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0, 0.08f);
 		ghostNPCs.add(newNPC);
 
-		game.initializeNPCPhysics(newNPC);
+		initializeNPCPhysics(newNPC);
 	}
 
-	public void updateGhostNPC(int id, String[] position, float rot) throws IOException
+	private void initializeNPCPhysics(GhostNPC ghostNPC) {
+		Vector3f spawnPos = ghostNPC.getWorldLocation();
+		spawnPos.add(0, 0.3f,0);
+
+		PhysicsObject npcPhysics = (game.getEngine().getSceneGraph()).addPhysicsCapsule(
+				0.0f,
+				spawnPos,
+				new Quaternionf(),
+				1,.2f,.25f
+		);
+		ghostNPC.setPhysicsObject(npcPhysics);
+		npcPhysics.disableSleeping();
+		npcPhysics.setBounciness(0.1f);
+	}
+
+	private void removeNPCPhysics(GhostNPC ghostNPC) {
+		game.getEngine().getSceneGraph().removePhysicsObject(ghostNPC.getPhysicsObject());
+	}
+
+	public void updateGhostNPC(int id, Vector3f ghostPosition, float rot) throws IOException
 	{
 		GhostNPC ghostNPC = findNPC(id);
-
-		Vector3f ghostPosition = new Vector3f(
-				Float.parseFloat(position[0]),
-				Float.parseFloat(position[1]),
-				Float.parseFloat(position[2]));
-
         try {
 			ghostNPC.setPosition(ghostPosition, rot);
 		} catch (Error e){
 			e.printStackTrace();
 			System.out.println("couldn't update");
+		}
+	}
+
+	public void removeGhostNPC(int id)
+	{	GhostNPC ghostNPC = findNPC(id);
+		if(ghostNPC != null)
+		{	game.getEngine().getSceneGraph().removeGameObject(ghostNPC);
+			ghostNPCs.remove(ghostNPC);
+			removeNPCPhysics(ghostNPC);
+		}
+		else
+		{	System.out.println("[SERVER]: Tried to remove, but unable to find ghost NPC in list");
 		}
 	}
 
@@ -73,6 +99,21 @@ public class GhostManager
 		newAvatar.setLocalScale(initialScale);
 		newAvatar.setLocalRotation(rotation);
 		ghostAvatars.add(newAvatar);
+
+		initializeAvatarPhysics(newAvatar);
+	}
+
+	private void initializeAvatarPhysics(GhostAvatar ghostAvatar) {
+		float[] carSize = {0.5f, 0.3f, 1.25f};
+		PhysicsObject avatarPhysics = (game.getEngine().getSceneGraph()).addPhysicsBox(
+				1.0f, ghostAvatar.getWorldLocation(), new Quaternionf(), carSize);
+		ghostAvatar.setPhysicsObject(avatarPhysics);
+		avatarPhysics.disableSleeping();
+		avatarPhysics.setBounciness(0.15f);
+	}
+
+	private void removeAvatarPhysics(GhostAvatar ghostAvatar) {
+		game.getEngine().getSceneGraph().removePhysicsObject(ghostAvatar.getPhysicsObject());
 	}
 
 	public void removeGhostAvatar(UUID id)
@@ -80,9 +121,10 @@ public class GhostManager
 		if(ghostAvatar != null)
 		{	game.getEngine().getSceneGraph().removeGameObject(ghostAvatar);
 			ghostAvatars.remove(ghostAvatar);
+			removeAvatarPhysics(ghostAvatar);
 		}
 		else
-		{	System.out.println("[SERVER]: Tried to remove, but unable to find ghost in list");
+		{	System.out.println("[SERVER]: Tried to remove, but unable to find ghost Avatar in list");
 		}
 	}
 

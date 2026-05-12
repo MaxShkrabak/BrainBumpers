@@ -171,10 +171,10 @@ public class ProtocolClient extends GameConnectionClient
 				int NPCid = Integer.parseInt(messageTokens[1]);
 				// create a new ghost NPC
 				// Parse out the position
-				String[] ghostPosition = new String[]{
-						messageTokens[2],
-						messageTokens[3],
-						messageTokens[4]};
+				Vector3f ghostPosition = new Vector3f(
+						Float.parseFloat(messageTokens[2]),
+						Float.parseFloat(messageTokens[3]),
+						Float.parseFloat(messageTokens[4]));
 				float rot = Float.parseFloat(messageTokens[5]);
 				try {
 					ghostManager.updateGhostNPC(NPCid, ghostPosition, rot);

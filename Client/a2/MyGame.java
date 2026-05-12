@@ -319,22 +319,6 @@ public class MyGame extends VariableFrameRateGame {
         carPhysics.setBounciness(0.15f);
     }
 
-    public void initializeNPCPhysics(GhostNPC ghostNPC) {
-        // float[] npcSize = {0.3f, 0.6f, 0.3f}; // adjust to match your zombie model size
-        Vector3f spawnPos = ghostNPC.getWorldLocation();
-        spawnPos.add(0, 0.3f,0);
-
-        PhysicsObject npcPhysics = (engine.getSceneGraph()).addPhysicsCapsule(
-                0.0f,                          // mass — lighter than car
-                spawnPos,
-                new Quaternionf(),
-                1,.2f,.25f
-        );
-        ghostNPC.setPhysicsObject(npcPhysics);
-        npcPhysics.disableSleeping();
-        npcPhysics.setBounciness(0.1f);
-    }
-
     @Override
     public void createViewports() {
         viewportController = new ViewportController(engine);
