@@ -230,7 +230,7 @@ public class MyGame extends VariableFrameRateGame {
 
         // TODO: Update textures
         // buildings
-        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -20f, 0f, 10f, 2f, 270f);
+        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -20f, 0f, 10f, 2f, 180f);
         casino = spawnObject(GameObject.root(), casinoS, casinoT, 0f, 0f, -10f, 2f, 0f);
         casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0f, 0f, 0f, 1f, 0f);
         twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -35f, 0f, 10f, 2f, 90f);
@@ -247,26 +247,26 @@ public class MyGame extends VariableFrameRateGame {
         rHome4 = spawnObject(GameObject.root(), rHomeS, rHomeT, -25f, 0f, 35f, 2f, 180f);
         // TODO: stuff
 
-        twoStoryHome1 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome2 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome3 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome4 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome5 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome1 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 21.5f, 2f, 90f);
+        twoStoryHome2 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 26.5f, 2f, 90f);
+        twoStoryHome3 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 31.5f, 2f, 90f);
+        twoStoryHome4 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 36.5f, 2f, 90f);
+        //twoStoryHome5 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 41.5f, 2f, 180f);
 
-        twoStoryRoof1 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof2 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof3 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof4 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof5 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof6 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof7 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof1 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 21.5f, 2f, 270f);
+        twoStoryRoof2 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 26.5f, 2f, 270f);
+        twoStoryRoof3 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 31.5f, 2f, 270f);
+        twoStoryRoof4 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 36.5f, 2f, 270f);
+        //twoStoryRoof5 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        //twoStoryRoof6 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        //twoStoryRoof7 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
 
-        threeStoryBalcony = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        pharmacySign = spawnObject(GameObject.root(), pharmacySignS, twoStoryWideT1, 0, 8, 0, 2f, 180f);
-        twoStoryBalcony = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        hardwareSign = spawnObject(GameObject.root(), hardwareSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
-        twoStoryColumns = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        barbershopSign = spawnObject(GameObject.root(), barbershopSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
+        threeStoryBalcony = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, -15, 0, 10, 2f, 180f);
+        pharmacySign = spawnObject(threeStoryBalcony, pharmacySignS, casinoSignT, 0, 8.55f, -1.9f, 1f, 0f);
+        twoStoryBalcony = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, -10, 0, 10, 2f, 180f);
+        hardwareSign = spawnObject(twoStoryBalcony, hardwareSignS, casinoSignT, 0, 5.7f, -1.9f, 1f, 0f);
+        twoStoryColumns = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, -5, 0, 10, 2f, 180f);
+        barbershopSign = spawnObject(twoStoryColumns, barbershopSignS, casinoSignT, 0, 5.6f, -2.4f, 1f, 0f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
@@ -406,6 +406,23 @@ public class MyGame extends VariableFrameRateGame {
         addHitbox(house1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(house2, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(house3, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+
+        // two-story homes
+        addHitbox(twoStoryHome1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome2, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome3, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome4, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+
+        // two-story homes with roof
+        addHitbox(twoStoryRoof1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+
+        // market buildings
+        addHitbox(threeStoryBalcony, 0, 5f, 5f, 4.7f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryBalcony, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryColumns, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
 
         // house with roof building
         addHitbox(rHome1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
