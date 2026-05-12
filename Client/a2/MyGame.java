@@ -211,7 +211,7 @@ public class MyGame extends VariableFrameRateGame {
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 25f, 15f, 14f, 0.50f, 230.0f);
 
         // buildings
-        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, 25f, 0f, 14f, 2f, 0f);
+        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -25f, 0f, 14f, 2f, 270f);
         casino = spawnObject(GameObject.root(), casinoS, casinoT, 50f, 0f, 32f, 2f, 0f);
         casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0, 0f, 0f, 1f, 0f);
 
@@ -308,10 +308,17 @@ public class MyGame extends VariableFrameRateGame {
         float[] size = {w, h, d};
         Vector3f loc = obj.getWorldLocation();
 
-        // location + offset
-        Vector3f finalLoc = new Vector3f(loc.x + xO, loc.y + yO, loc.z + zO);
+        Quaternionf objRotation = new Quaternionf();
+        obj.getWorldRotation().getNormalizedRotation(objRotation);
 
-        (engine.getSceneGraph()).addPhysicsBox(m, finalLoc, new Quaternionf(), size);
+        Vector3f offset = new Vector3f(xO, yO, zO);
+
+        offset.rotate(objRotation);
+
+        // location + offset
+        Vector3f finalLoc = new Vector3f(loc).add(offset);
+
+        (engine.getSceneGraph()).addPhysicsBox(m, finalLoc, objRotation, size);
     }
 
     @Override
