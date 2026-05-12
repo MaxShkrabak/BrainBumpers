@@ -51,6 +51,14 @@ public class CarController {
     public void update(float dt, PhysicsObject physicsObj, GameObject terrain) {
         boolean isGrounded = avatar.getWorldLocation().y() <= terrain.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z()) + 0.6f;
 
+        if (physicsObj != null && isGrounded) {
+            float[] vel = physicsObj.getLinearVelocity();
+            float actualXZSpeed = Math.sqrt(vel[0] * vel[0] + vel[2] * vel[2]);
+            if (Math.abs(currentSpeed) - actualXZSpeed > 1.0f) {
+                currentSpeed = Math.signum(currentSpeed) * actualXZSpeed;
+            }
+        }
+
         if (isGrounded && avatar.getWorldLocation().y() >= -0.75f ) {
             // speeding up and slowing down
             if (throttle != 0f) {
