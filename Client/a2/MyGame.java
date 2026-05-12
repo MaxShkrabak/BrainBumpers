@@ -36,15 +36,15 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, terr;
     private GameObject x, y, z; // world axes
-    private GameObject tallBuilding, casino, casinoSign;
+    private GameObject tallBuilding, casino, casinoSign, twoStoryWide1, twoStoryWide2;
 
     private AnimatedShape zombieS;
     private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS;
     private ObjShape linxS, linyS, linzS;
-    private ObjShape tallBuildingS, casinoS, casinoSignS;
+    private ObjShape tallBuildingS, casinoS, casinoSignS, twoStoryWideS;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
-    private TextureImage tallBuildingT, casinoT, casinoSignT;
+    private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2;
 
     private Light light1, moonLight, headLightsL, headLightsR;
 
@@ -159,6 +159,7 @@ public class MyGame extends VariableFrameRateGame {
         tallBuildingS = new ImportedModel("TallBuilding.obj");
         casinoS = new ImportedModel("Casino.obj");
         casinoSignS = new ImportedModel("CasinoSign.obj");
+        twoStoryWideS = new ImportedModel("TwoStoryWide.obj");
 
         // terrain shape
         terrS = new TerrainPlane(200); // pixels per axis = 200x200
@@ -178,7 +179,8 @@ public class MyGame extends VariableFrameRateGame {
         tallBuildingT = new TextureImage("YlwBuildingTexture.png");
         casinoT = new TextureImage("CasinoTexture.png");
         casinoSignT = new TextureImage("SignsTexture.png");
-
+        twoStoryWideT1 = new TextureImage("DarkBuildingTexture.png");
+        twoStoryWideT2 = new TextureImage("RedBuildingTexture.png");
 
         // terrain textures
         hills = new TextureImage("CityMap.png");    // height map
@@ -196,11 +198,11 @@ public class MyGame extends VariableFrameRateGame {
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
         // car
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20.0f, 15f, 1.0f, 0.0f);
-        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.22f, -0.09f, -0.385f, 1f, 0f);
-        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.19f, -0.09f, -0.385f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.22f, -0.09f, 0.315f, 1f, 0f);
-        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.19f, -0.09f, 0.315f, 1f, 0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20f, 15f, 2f, 0f);
+        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
+        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.38f, -0.18f, 0.63f, 1f, 0f);
 
         backLeftTire.applyParentRotationToPosition(true);
         backRightTire.applyParentRotationToPosition(true);
@@ -212,8 +214,10 @@ public class MyGame extends VariableFrameRateGame {
 
         // buildings
         tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -25f, 0f, 14f, 2f, 270f);
-        casino = spawnObject(GameObject.root(), casinoS, casinoT, 50f, 0f, 32f, 2f, 0f);
-        casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0, 0f, 0f, 1f, 0f);
+        casino = spawnObject(GameObject.root(), casinoS, casinoT, 0f, 0f, -10f, 2f, 0f);
+        casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0f, 0f, 0f, 1f, 0f);
+        twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -50f, 0f, 10f, 2f, 90f);
+        twoStoryWide2 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT2, -50f, 0f, -10f, 2f, 90f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
@@ -342,8 +346,12 @@ public class MyGame extends VariableFrameRateGame {
         addHitbox(casino, 0, 0.1f, 2f, 0.1f,  1.0f, 1.0f, 3.12f); // Right-Left pillar
         addHitbox(casino, 0, 0.1f, 2f, 0.1f,  2.3f, 1.0f, 3.12f); // Right-Right pillar
 
+        // Two-story wide building
+        addHitbox(twoStoryWide1, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryWide2, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+
         // car hitbox
-        float[] carSize = {0.5f, 0.3f, 1.25f};
+        float[] carSize = {1f, 0.6f, 2.5f};
         PhysicsObject carPhysics = (engine.getSceneGraph()).addPhysicsBox(
             1.0f, avatar.getWorldLocation(), new Quaternionf(), carSize);
         avatar.setPhysicsObject(carPhysics);
@@ -386,10 +394,10 @@ public class MyGame extends VariableFrameRateGame {
 
             if (carPhysics != null) {
                 Vector3f physLoc = carPhysics.getLocation();
-                avatar.setLocalLocation(new Vector3f(physLoc.x, physLoc.y, physLoc.z));
-
                 Quaternionf avatarRot = new Quaternionf();
                 avatar.getWorldRotation().getNormalizedRotation(avatarRot);
+                Vector3f sideShift = new Vector3f(-0.03f, 0f, 0f).rotate(avatarRot); // fixes hitbox being too far right
+                avatar.setLocalLocation(new Vector3f(physLoc.x + sideShift.x, physLoc.y + 0.05f, physLoc.z + sideShift.z));
                 carPhysics.setTransform(physLoc, avatarRot);
                 carPhysics.setAngularVelocity(new float[]{0f, 0f, 0f});
 

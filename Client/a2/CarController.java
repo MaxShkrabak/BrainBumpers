@@ -21,7 +21,7 @@ public class CarController {
     private static final float MAX_SPEED = 14f;
     private static final float ACCELERATION = 10f;
     private static final float DECELERATION = 14f;
-    private static final float WHEEL_RADIUS = 0.3f;
+    private static final float WHEEL_RADIUS = 0.6f;
 
     public CarController(GameObject avatar, GameObject frontLeftTire, GameObject frontRightTire, GameObject backLeftTire, GameObject backRightTire, ProtocolClient protClient, boolean isMultiplayer) {
         this.avatar = avatar;
@@ -49,7 +49,7 @@ public class CarController {
     }
 
     public void update(float dt, PhysicsObject physicsObj, GameObject terrain) {
-        boolean isGrounded = avatar.getWorldLocation().y() <= terrain.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z()) + 0.6f;
+        boolean isGrounded = avatar.getWorldLocation().y() <= terrain.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z()) + 1.2f;
 
         if (physicsObj != null && isGrounded) {
             float[] vel = physicsObj.getLinearVelocity();
@@ -59,7 +59,7 @@ public class CarController {
             }
         }
 
-        if (isGrounded && avatar.getWorldLocation().y() >= -0.75f ) {
+        if (isGrounded && avatar.getWorldLocation().y() >= -1.5f ) {
             // speeding up and slowing down
             if (throttle != 0f) {
                 float target = MAX_SPEED * throttle;
