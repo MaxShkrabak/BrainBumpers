@@ -83,8 +83,8 @@ void calcPositionalLight()
 
 void calcSpotLight()
 {	// compute the angle between the spotlight direction and the direction to this pixel
-	float cosAngle = abs(dot(-L, normalize((light.direction).xyz)));
-	float angleD = degrees(acos(cosAngle));
+	float cosAngle = dot(-L, normalize((light.direction).xyz));
+	float angleD = degrees(acos(clamp(cosAngle, -1.0, 1.0)));
 	
 	// compute the intensity factor of the light based on the angle
 	if (angleD > light.cutoffAngle)

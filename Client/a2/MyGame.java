@@ -46,11 +46,12 @@ public class MyGame extends VariableFrameRateGame {
     private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
     private TextureImage tallBuildingT, casinoT, casinoSignT;
 
-    private Light light1, moonLight;
+    private Light light1, moonLight, headLightsL, headLightsR;
 
     private int score = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
     private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false, showPhysics = false;
+    private boolean wasMoving = false;
 
     private String actionMsg = "";
     private float actionTimer = 0.0f;
@@ -234,8 +235,32 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).addLight(light1);
 
         moonLight = setLight(new Vector3f(0f, 10f, 0f), 5f, 0f, 3f); // TODO: If we change the skybox to include a moon
+
+        headLightsL = new Light();
+        headLightsR = new Light();
+        setupHeadlight(headLightsL, 1.0f, 0.95f, 0.8f, avatar.getWorldLocation(), new Vector3f(0f, -0.2f, -1f));
+        setupHeadlight(headLightsR, 1.0f, 0.95f, 0.8f, avatar.getWorldLocation(), new Vector3f(0f, -0.2f, -1f));
     }
 
+    private void setupHeadlight(Light hl, float diffR, float diffG, float diffB, Vector3f loc, Vector3f dir){
+        hl.setType(Light.LightType.SPOTLIGHT);
+
+        hl.setDiffuse(diffR, diffG, diffB);
+        hl.setAmbient(0.1f, 0.1f, 0.1f);
+
+        hl.setCutoffAngle(35.0f);
+        hl.setOffAxisExponent(5.0f);
+
+        hl.setConstantAttenuation(1.0f);
+        hl.setLinearAttenuation(0.09f);
+        hl.setQuadraticAttenuation(0.02f);
+
+        hl.setLocation(loc);
+        hl.setDirection(dir);
+
+        hl.disable();
+        (engine.getSceneGraph()).addLight(hl);
+    }
     private Light setLight(Vector3f location, float r, float g, float b) {
         Light light = new Light();
         light.setLocation(location);
@@ -372,6 +397,8 @@ public class MyGame extends VariableFrameRateGame {
             setEarParameters();
 
             orbitController.updateCameraPosition();
+
+
         }
 
         updateHud();
@@ -381,6 +408,17 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         zombieS.updateAnimation();
+
+        boolean isMoving = Math.abs(carController.getCurrentSpeed()) > 0.01f;
+
+        if (isMoving) {
+            updateHeadlights();
+            wasMoving = true;
+        } else if (wasMoving) {
+            // One final update when car just stopped
+            updateHeadlights();
+            wasMoving = false;
+        }
     }
 
     private void updateHud() {
@@ -458,6 +496,13 @@ public class MyGame extends VariableFrameRateGame {
     public void keyPressed(KeyEvent e) {
         if (!isGameOver) {
             switch (e.getKeyCode()) {
+                case KeyEvent.VK_L:
+                    if(isGameStarted || !isMultiplayerMode) {
+                        headLightsL.toggleOnOff();
+                        headLightsR.toggleOnOff();
+                        updateHeadlights();
+                    }
+                    break;
                 case KeyEvent.VK_X:
                     toggleAxes();
                     break;
@@ -748,6 +793,28 @@ public class MyGame extends VariableFrameRateGame {
     {	protClient.sendByeMessage();
     }
     }
+    }
+
+    public void updateHeadlights(){
+        Matrix4f rot = avatar.getLocalRotation();
+
+        Vector3f forward = new Vector3f(rot.m20(), rot.m21(), rot.m22());
+        Vector3f right   = new Vector3f(rot.m00(), rot.m01(), rot.m02());
+        Vector3f up      = new Vector3f(rot.m10(), rot.m11(), rot.m12());
+
+        Vector3f avatarPos = avatar.getWorldLocation();
+
+        Vector3f leftOffset  = new Vector3f(right).mul(-0.17f);
+        Vector3f rightOffset = new Vector3f(right).mul( 0.18f);
+        Vector3f frontOffset = new Vector3f(forward).mul(.55f);
+        Vector3f upOffset    = new Vector3f(up).mul(0.06f);
+
+        headLightsL.setLocation(new Vector3f(avatarPos).add(leftOffset).add(frontOffset).add(upOffset));
+        headLightsR.setLocation(new Vector3f(avatarPos).add(rightOffset).add(frontOffset).add(upOffset));
+
+        Vector3f lightDir = new Vector3f(forward).add(new Vector3f(up).mul(-0.2f)).normalize();
+        headLightsL.setDirection(lightDir);
+        headLightsR.setDirection(lightDir);
     }
 
     public void setThrottle(float input) { carController.setThrottle(input); }
