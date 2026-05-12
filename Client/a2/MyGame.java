@@ -339,7 +339,8 @@ public class MyGame extends VariableFrameRateGame {
             im.update((float) moveTime);
 
             PhysicsObject carPhysics = avatar.getPhysicsObject();
-            carController.update((float) moveTime, carPhysics);
+
+            carController.update((float) moveTime, carPhysics, terr);
 
             (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
 

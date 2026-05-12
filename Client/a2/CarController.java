@@ -48,36 +48,45 @@ public class CarController {
         updateAllTires();
     }
 
-    public void update(float dt, PhysicsObject physicsObj) {
-        // speeding up and slowing down
-        if (throttle != 0f) {
-            float target = MAX_SPEED * throttle;
-            float diff = target - currentSpeed;
-            float step = ACCELERATION * dt;
-            if (Math.abs(diff) <= step) currentSpeed = target;
-            else currentSpeed += Math.signum(diff) * step;
-        } else {
-            float step = DECELERATION * dt;
-            if (Math.abs(currentSpeed) <= step) currentSpeed = 0f;
-            else currentSpeed -= Math.signum(currentSpeed) * step;
-        }
+    public void update(float dt, PhysicsObject physicsObj, GameObject terrain) {
+        boolean isGrounded = avatar.getWorldLocation().y() <= terrain.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z()) + 0.6f;
 
-        if (currentSpeed != 0f) {
-            // turning is less sharp at high speed
-            float tightness = 1f - (Math.abs(currentSpeed) / MAX_SPEED) * 0.7f;
-            float turnAmount = currentSpeed * Math.sin(wheelAngle * tightness) * dt;
-            if (turnAmount != 0f) {
-                avatar.globalYaw(turnAmount);
-                if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount);
+        if (isGrounded && avatar.getWorldLocation().y() >= -0.75f ) {
+            // speeding up and slowing down
+            if (throttle != 0f) {
+                float target = MAX_SPEED * throttle;
+                float diff = target - currentSpeed;
+                float step = ACCELERATION * dt;
+                if (Math.abs(diff) <= step) currentSpeed = target;
+                else currentSpeed += Math.signum(diff) * step;
+            } else {
+                float step = DECELERATION * dt;
+                if (Math.abs(currentSpeed) <= step) currentSpeed = 0f;
+                else currentSpeed -= Math.signum(currentSpeed) * step;
+            }
+
+            if (currentSpeed != 0f) {
+                // turning is less sharp at high speed
+                float tightness = 1f - (Math.abs(currentSpeed) / MAX_SPEED) * 0.7f;
+                float turnAmount = currentSpeed * Math.sin(wheelAngle * tightness) * dt;
+                if (turnAmount != 0f) {
+                    avatar.globalYaw(turnAmount);
+                    if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount);
+                }
             }
         }
 
         if (physicsObj != null) {
-            Vector4f fwd = new Vector4f(0f, 0f, 1f, 1f);
-            fwd.mul(avatar.getWorldRotation());
             float[] curVel = physicsObj.getLinearVelocity();
-            float vertVel = Math.min(curVel[1], 0f); // to help prevent collision climbing
-            physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, vertVel, fwd.z() * currentSpeed});
+
+            if (isGrounded) {
+                Vector4f fwd = new Vector4f(0f, 0f, 1f, 1f);
+                fwd.mul(avatar.getWorldRotation());
+                float vertVel = Math.min(curVel[1], 0f); // to help prevent collision climbing
+                physicsObj.setLinearVelocity(new float[]{fwd.x() * currentSpeed, vertVel, fwd.z() * currentSpeed});
+            } else {
+                currentSpeed = Math.sqrt((curVel[0] * curVel[0]) + (curVel[2] * curVel[2]));
+            }
 
             if (isMultiplayer && protClient != null) protClient.sendMoveMessage(avatar.getWorldLocation());
         }
