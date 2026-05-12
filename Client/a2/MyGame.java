@@ -36,15 +36,19 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, terr;
     private GameObject x, y, z; // world axes
-    private GameObject tallBuilding, casino, casinoSign, twoStoryWide1, twoStoryWide2;
+    private GameObject tallBuilding, casino, casinoSign, twoStoryWide1, twoStoryWide2, twoStoryWide3, twoStoryWide4, twoStoryWide5, rHome1, rHome2, rHome3, rHome4, house1, house2, house3,
+            twoStoryHome1, twoStoryHome2, twoStoryHome3, twoStoryHome4, twoStoryHome5,
+            twoStoryRoof1, twoStoryRoof2, twoStoryRoof3, twoStoryRoof4, twoStoryRoof5, twoStoryRoof6, twoStoryRoof7,
+            threeStoryBalcony, pharmacySign, twoStoryBalcony, hardwareSign, twoStoryColumns, barbershopSign;
 
     private AnimatedShape zombieS;
-    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS;
+    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS, rHomeS, houseS;
     private ObjShape linxS, linyS, linzS;
-    private ObjShape tallBuildingS, casinoS, casinoSignS, twoStoryWideS;
+    private ObjShape tallBuildingS, casinoS, casinoSignS, twoStoryWideS, twoStoryHomeS, twoStoryRoofS,
+            threeStoryBalconyS, pharmacySignS, twoStoryBalconyS, hardwareSignS, twoStoryColumnsS, barbershopSignS;;
 
     private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
-    private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2;
+    private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2, rHomeT, houseT;
 
     private Light light1, moonLight, headLightsL, headLightsR;
 
@@ -160,6 +164,16 @@ public class MyGame extends VariableFrameRateGame {
         casinoS = new ImportedModel("Casino.obj");
         casinoSignS = new ImportedModel("CasinoSign.obj");
         twoStoryWideS = new ImportedModel("TwoStoryWide.obj");
+        rHomeS = new ImportedModel("HomeRoof.obj");
+        houseS = new ImportedModel("House.obj");
+        twoStoryHomeS = new ImportedModel("TwoStoryHome.obj");
+        twoStoryRoofS = new ImportedModel("TwoStoryRoof.obj");
+        threeStoryBalconyS = new ImportedModel("ThreeStoryBalcony.obj");
+        pharmacySignS = new ImportedModel("SignPharmacy.obj");
+        twoStoryBalconyS = new ImportedModel("TwoStoryBalcony.obj");
+        hardwareSignS = new ImportedModel("SignHardware.obj");
+        twoStoryColumnsS = new ImportedModel("TwoStoryColumns.obj");
+        barbershopSignS = new ImportedModel("SignBarbershop.obj");
 
         // terrain shape
         terrS = new TerrainPlane(200); // pixels per axis = 200x200
@@ -181,6 +195,8 @@ public class MyGame extends VariableFrameRateGame {
         casinoSignT = new TextureImage("SignsTexture.png");
         twoStoryWideT1 = new TextureImage("DarkBuildingTexture.png");
         twoStoryWideT2 = new TextureImage("RedBuildingTexture.png");
+        rHomeT = new TextureImage("YlwBuildingTexture.png");
+        houseT = new TextureImage("RedBuildingTexture.png");
 
         // terrain textures
         hills = new TextureImage("CityMap.png");    // height map
@@ -212,12 +228,45 @@ public class MyGame extends VariableFrameRateGame {
         // zombies
         zombie = spawnObject(GameObject.root(), zombieS, zombieT, 25f, 15f, 14f, 0.50f, 230.0f);
 
+        // TODO: Update textures
         // buildings
-        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -25f, 0f, 14f, 2f, 270f);
+        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -20f, 0f, 10f, 2f, 270f);
         casino = spawnObject(GameObject.root(), casinoS, casinoT, 0f, 0f, -10f, 2f, 0f);
         casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0f, 0f, 0f, 1f, 0f);
         twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -35f, 0f, 10f, 2f, 90f);
         twoStoryWide2 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT2, -35f, 0f, -10f, 2f, 90f);
+        twoStoryWide3 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -25f, 0f, -10f, 2f, 270f);
+        twoStoryWide4 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -10f, 0f, 20f, 2f, 180f);
+        twoStoryWide5 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, 3f, 0f, 20f, 2f, 180f);
+        house1 = spawnObject(GameObject.root(), houseS, houseT, -30f, 0f, 25f, 2f, 90f);
+        rHome1 = spawnObject(GameObject.root(), rHomeS, rHomeT, -30f, 0f, 30f, 2f, 90f);
+        house2 = spawnObject(GameObject.root(), houseS, houseT, -30f, 0f, 20f, 2f, 90f);
+        house3 = spawnObject(GameObject.root(), houseS, houseT, -20f, 0f, 25f, 2f, 270f);
+        rHome2 = spawnObject(GameObject.root(), rHomeS, rHomeT, -20f, 0f, 30f, 2f, 270f);
+        rHome3 = spawnObject(GameObject.root(), rHomeS, rHomeT, -20f, 0f, 20f, 2f, 270f);
+        rHome4 = spawnObject(GameObject.root(), rHomeS, rHomeT, -25f, 0f, 35f, 2f, 180f);
+        // TODO: stuff
+
+        twoStoryHome1 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome2 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome3 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome4 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome5 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+
+        twoStoryRoof1 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof2 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof3 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof4 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof5 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof6 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof7 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+
+        threeStoryBalcony = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        pharmacySign = spawnObject(GameObject.root(), pharmacySignS, twoStoryWideT1, 0, 8, 0, 2f, 180f);
+        twoStoryBalcony = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        hardwareSign = spawnObject(GameObject.root(), hardwareSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
+        twoStoryColumns = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        barbershopSign = spawnObject(GameObject.root(), barbershopSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
@@ -349,6 +398,20 @@ public class MyGame extends VariableFrameRateGame {
         // Two-story wide building
         addHitbox(twoStoryWide1, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
         addHitbox(twoStoryWide2, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryWide3, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryWide4, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryWide5, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+
+        // house building
+        addHitbox(house1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(house2, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(house3, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+
+        // house with roof building
+        addHitbox(rHome1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(rHome2, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(rHome3, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(rHome4, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
 
         // car hitbox
         float[] carSize = {1f, 0.6f, 2.5f};
@@ -412,8 +475,6 @@ public class MyGame extends VariableFrameRateGame {
             setEarParameters();
 
             orbitController.updateCameraPosition();
-
-
         }
 
         updateHud();
