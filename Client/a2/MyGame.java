@@ -216,15 +216,15 @@ public class MyGame extends VariableFrameRateGame {
         tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -25f, 0f, 14f, 2f, 270f);
         casino = spawnObject(GameObject.root(), casinoS, casinoT, 0f, 0f, -10f, 2f, 0f);
         casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0f, 0f, 0f, 1f, 0f);
-        twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -50f, 0f, 10f, 2f, 90f);
-        twoStoryWide2 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT2, -50f, 0f, -10f, 2f, 90f);
+        twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -35f, 0f, 10f, 2f, 90f);
+        twoStoryWide2 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT2, -35f, 0f, -10f, 2f, 90f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
         terr = new GameObject(GameObject.root(), terrS, road);
         initialTranslation = (new Matrix4f()).translation(0f,0f,0f);
         terr.setLocalTranslation(initialTranslation);
-        initialScale = (new Matrix4f()).scaling(100.0f, 15.0f, 100.0f);
+        initialScale = (new Matrix4f()).scaling(65.0f, 12.0f, 65.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(hills);
         terr.getRenderStates().setTiling(1);
@@ -329,7 +329,7 @@ public class MyGame extends VariableFrameRateGame {
     public void initializePhysicsObjects() {
         // terrain mesh
         (engine.getSceneGraph()).addPhysicsStaticTerrainMesh(
-            new Vector3f(0f, 0f, 0f), new Quaternionf(), hills, 100.0f, 15.0f, 200);
+            new Vector3f(0f, 0f, 0f), new Quaternionf(), hills, 65.0f, 12.0f, 100);
 
         (engine.getSceneGraph()).getPhysicsEngine().setGravity(new float[]{0f, -9.81f, 0f});
 
