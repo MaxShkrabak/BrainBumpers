@@ -80,6 +80,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 			// TODO Unready logic
 
+			if(messageTokens[0].compareTo("setTex") == 0)
+			{	UUID clientID = UUID.fromString(messageTokens[1]);
+				int skinOpt = Integer.parseInt(messageTokens[2]);
+				System.out.println("[CLIENT]: Set new Texture to " + skinOpt + " - " + clientID.toString());
+				sendSetTexMessages(clientID, skinOpt);
+			}
+
 			// BYE -- Case where clients leaves the server
 			// Received Message Format: (bye,localId)
 			if(messageTokens[0].compareTo("bye") == 0)
@@ -331,6 +338,16 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		} 
 		catch (IOException e) 
 		{	e.printStackTrace();
+	}	}
+
+	public void sendSetTexMessages(UUID clientID, int opt)
+	{	try
+	{	String message = new String("setTex," + clientID.toString() + "," + opt);
+		forwardPacketToAll(message, clientID);
+		//Notify all players that a player has left the game IN GAME
+	}
+	catch (IOException e)
+	{	e.printStackTrace();
 	}	}
 
 	public void startGameMessage()

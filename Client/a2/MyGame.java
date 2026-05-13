@@ -51,7 +51,10 @@ public class MyGame extends VariableFrameRateGame {
             threeStoryBalconyS, pharmacySignS, twoStoryBalconyS, hardwareSignS, twoStoryColumnsS, barbershopSignS,
             oneStoryS, bakerySignS, twoStoryDoubleS, bookshopSignS;
 
-    private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
+    private TextureImage tireT, zombieT, hills, road;
+    private TextureImage[] avatarT = new TextureImage[3];
+    private int currSkinOpt = 0;
+
     private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2, rHomeT, houseT;
 
     private Light light1, moonLight, headLightsL, headLightsR;
@@ -84,6 +87,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private IAudioManager audioMgr;
     private Sound carEngineSound, ambientSound;
+    Random rn = new Random();
 
     public MyGame(String serverAddress, int serverPort, String protocol)
     {	super();
@@ -190,8 +194,9 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void loadTextures() {
         // car textures
-        avatarT = new TextureImage("CarTexture.png");
-        ghostT = new TextureImage("CarTexture.png");
+        avatarT[0] = new TextureImage("CarTexture1.png");
+        avatarT[1] = new TextureImage("CarTexture2.png");
+        avatarT[2] = new TextureImage("CarTexture3.png");
         tireT = new TextureImage("TireTexture.png");
 
         // zombie textures
@@ -222,7 +227,8 @@ public class MyGame extends VariableFrameRateGame {
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
         // car
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20f, 15f, 2f, 0f);
+        currSkinOpt = rn.nextInt(3);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT[currSkinOpt], 10f, 20f, 15f, 2f, 0f);
         backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
         backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
         frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);
@@ -638,6 +644,25 @@ public class MyGame extends VariableFrameRateGame {
     public void keyPressed(KeyEvent e) {
         if (!isGameOver) {
             switch (e.getKeyCode()) {
+
+                case KeyEvent.VK_Q:
+                    if (!isGameStarted || !isMultiplayerMode){
+                        currSkinOpt = (currSkinOpt + 1) % avatarT.length;
+                        avatar.setTextureImage(avatarT[currSkinOpt]);
+                        if(isMultiplayerMode && protClient != null){
+                            protClient.sendSetTexMessage(currSkinOpt);
+                        }
+                    }
+                    break;
+                case KeyEvent.VK_E:
+                    if (!isGameStarted || !isMultiplayerMode){
+                        currSkinOpt = (currSkinOpt - 1 + avatarT.length) % avatarT.length;
+                        avatar.setTextureImage(avatarT[currSkinOpt]);
+                        if(isMultiplayerMode && protClient != null){
+                            protClient.sendSetTexMessage(currSkinOpt);
+                        }
+                    }
+                    break;
                 case KeyEvent.VK_L:
                     if(isGameStarted || !isMultiplayerMode) {
                         headLightsL.toggleOnOff();
@@ -880,7 +905,7 @@ public class MyGame extends VariableFrameRateGame {
     // ---------- NETWORKING SECTION ----------------
 
     public ObjShape getGhostShape() { return ghostS; }
-    public TextureImage getGhostTexture() { return ghostT; }
+    public TextureImage getGhostTexture(int opt) { return avatarT[opt]; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
     public AnimatedShape getNPCShape() { return zombieS; }
@@ -946,10 +971,10 @@ public class MyGame extends VariableFrameRateGame {
 
         Vector3f avatarPos = avatar.getWorldLocation();
 
-        Vector3f leftOffset  = new Vector3f(right).mul(-0.17f);
-        Vector3f rightOffset = new Vector3f(right).mul( 0.18f);
-        Vector3f frontOffset = new Vector3f(forward).mul(.55f);
-        Vector3f upOffset    = new Vector3f(up).mul(0.06f);
+        Vector3f leftOffset  = new Vector3f(right).mul(-0.2f);
+        Vector3f rightOffset = new Vector3f(right).mul( 0.2f);
+        Vector3f frontOffset = new Vector3f(forward).mul(.65f);
+        Vector3f upOffset    = new Vector3f(up).mul(0.1f);
 
         headLightsL.setLocation(new Vector3f(avatarPos).add(leftOffset).add(frontOffset).add(upOffset));
         headLightsR.setLocation(new Vector3f(avatarPos).add(rightOffset).add(frontOffset).add(upOffset));

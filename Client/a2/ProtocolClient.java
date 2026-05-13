@@ -104,6 +104,14 @@ public class ProtocolClient extends GameConnectionClient
 				{	System.err.println("[ERROR]: Error creating ghost avatar");
 				}
 			}
+
+			// Receive set new texture for a ghost from server
+			if (messageTokens[0].compareTo("setTex") == 0)
+			{
+				UUID ghostID = UUID.fromString(messageTokens[1]);
+				int skinOpt = Integer.parseInt(messageTokens[2]);
+                ghostManager.updateGhostAvatarTex(ghostID, skinOpt);
+            }
 			
 			// Handle WANTS_DETAILS message
 			// Format: (wsds,remoteId)
@@ -222,6 +230,14 @@ public class ProtocolClient extends GameConnectionClient
             throw new RuntimeException(e);
         }
     }
+
+	public void sendSetTexMessage(int opt) {
+		try {
+			sendPacket(new String("setTex," + id.toString() + "," + opt));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	// Informs the server of the clients Avatars position. The server 
 	// takes this message and forwards it to all other clients registered 
