@@ -184,6 +184,22 @@ public class ProtocolClient extends GameConnectionClient
 					e.printStackTrace();
 				} // error updating ghost avatar
 			}
+
+			// confirms npc was ran over
+			if (messageTokens[0].compareTo("removeNPC") == 0)
+			{	int npcId = Integer.parseInt(messageTokens[1]);
+				ghostManager.removeGhostNPC(npcId);
+				game.zombieKilled();
+			}
+
+			// player scores
+			if (messageTokens[0].compareTo("scoreUpdate") == 0)
+			{	for (int i = 1; i + 1 < messageTokens.length; i += 2)
+				{	UUID pid = UUID.fromString(messageTokens[i]);
+					int s = Integer.parseInt(messageTokens[i + 1]);
+					game.updatePlayerScore(pid, s);
+				}
+			}
 		}	}
 
 	public void sendConfirmationMessage()
@@ -273,6 +289,16 @@ public class ProtocolClient extends GameConnectionClient
 		} catch (IOException e) 
 		{	e.printStackTrace();
 	}	}
+
+	// Informs the server that the local player killed an NPC.
+	// Message Format: (killNPC,localId,npcId)
+	public void sendKillMessage(int npcId)
+	{	try
+		{	sendPacket("killNPC," + id.toString() + "," + npcId);
+		} catch (IOException e)
+		{	e.printStackTrace();
+		}
+	}
 
 	// Informs the server that the local avatar has changed rotation.
 	// Message Format: (turn,localId,angle).

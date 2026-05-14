@@ -14,6 +14,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	private boolean gameStarted = false, isSpawning = false;
 	private HashMap<UUID, String[]> curPositions = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
+	private HashMap<UUID, Integer> scores = new HashMap<>();
 
 	public GameServerUDP(int localPort, NPCcontroller npcCtrl) throws IOException
 	{
@@ -45,6 +46,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						sendJoinedMessage(clientID, true);
 						readyStatus.put(clientID, false); // Store the connected user in the hashmap
 						curPositions.put(clientID, new String[]{"0","0","0"});
+						scores.put(clientID, 0);
 					}
 				} 
 				catch (IOException e) 
@@ -89,6 +91,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				removeClient(clientID);
 
 				readyStatus.remove(clientID); // remove disconnected player from ready map
+				scores.remove(clientID);
 			}
 			
 			// CREATE -- Case where server receives a create message (to specify avatar location)
@@ -146,6 +149,18 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			if(messageTokens[0].compareTo("isnear") == 0)
 			{ UUID clientID = UUID.fromString(messageTokens[1]);
 				handleNearTiming(clientID);
+			}
+
+			// Client reports killing an NPC
+			// Received Message Format: (killNPC,clientId,npcId)
+			if(messageTokens[0].compareTo("killNPC") == 0)
+			{	UUID clientID = UUID.fromString(messageTokens[1]);
+				int npcId = Integer.parseInt(messageTokens[2]);
+				if (npcCtrl.removeNPC(npcId)) {
+					scores.merge(clientID, 1, Integer::sum);
+					sendRemoveNPCMessage(npcId);
+					sendScoreUpdate();
+				}
 			}
 
 		}	}
@@ -433,4 +448,25 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	catch (IOException e)
 	{	e.printStackTrace();
 	}	}
+
+	public void sendRemoveNPCMessage(int npcId)
+	{	try
+		{	sendPacketToAll("removeNPC," + npcId);
+		}
+		catch (IOException e)
+		{	e.printStackTrace();
+		}
+	}
+
+	public void sendScoreUpdate()
+	{	try
+		{	StringBuilder msg = new StringBuilder("scoreUpdate");
+			for (Map.Entry<UUID, Integer> entry : scores.entrySet())
+				msg.append(",").append(entry.getKey()).append(",").append(entry.getValue());
+			sendPacketToAll(msg.toString());
+		}
+		catch (IOException e)
+		{	e.printStackTrace();
+		}
+	}
 }

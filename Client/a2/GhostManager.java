@@ -25,7 +25,7 @@ public class GhostManager
 		System.out.println("[SERVER]: Adding NPC with ID --> " + id);
 		AnimatedShape s = game.getNPCShape();
 		TextureImage t = game.getNPCTexture();
-		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0, 0.08f);
+		GhostNPC newNPC = new GhostNPC(id, s, t, position, 0, 0.16f);
 		ghostNPCs.add(newNPC);
 
 		initializeNPCPhysics(newNPC);
@@ -33,13 +33,13 @@ public class GhostManager
 
 	private void initializeNPCPhysics(GhostNPC ghostNPC) {
 		Vector3f spawnPos = ghostNPC.getWorldLocation();
-		spawnPos.add(0, 0.3f,0);
+		spawnPos.add(0, 0.6f,0);
 
 		PhysicsObject npcPhysics = (game.getEngine().getSceneGraph()).addPhysicsCapsule(
 				0.0f,
 				spawnPos,
 				new Quaternionf(),
-				1,.2f,.25f
+				1,.4f,.5f
 		);
 		ghostNPC.setPhysicsObject(npcPhysics);
 		npcPhysics.disableSleeping();
@@ -53,12 +53,8 @@ public class GhostManager
 	public void updateGhostNPC(int id, Vector3f ghostPosition, float rot) throws IOException
 	{
 		GhostNPC ghostNPC = findNPC(id);
-        try {
-			ghostNPC.setPosition(ghostPosition, rot);
-		} catch (Error e){
-			e.printStackTrace();
-			System.out.println("couldn't update");
-		}
+		if (ghostNPC == null) return;
+		ghostNPC.setPosition(ghostPosition, rot);
 	}
 
 	public void removeGhostNPC(int id)

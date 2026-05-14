@@ -15,6 +15,7 @@ public class CarController {
     private float currentSpeed = 0f;
     private float throttle = 0f;
     private boolean turnKeyHeld = false;
+    private boolean skipSpeedSync = false;
 
     private static final float MAX_WHEEL_ANGLE = (float) Math.toRadians(30.0);
     private static final float WHEEL_RETURN_SPEED = 3.0f;
@@ -51,13 +52,14 @@ public class CarController {
     public void update(float dt, PhysicsObject physicsObj, GameObject terrain) {
         boolean isGrounded = avatar.getWorldLocation().y() <= terrain.getHeight(avatar.getWorldLocation().x(), avatar.getWorldLocation().z()) + 1.2f;
 
-        if (physicsObj != null && isGrounded) {
+        if (physicsObj != null && isGrounded && !skipSpeedSync) {
             float[] vel = physicsObj.getLinearVelocity();
             float actualXZSpeed = Math.sqrt(vel[0] * vel[0] + vel[2] * vel[2]);
             if (Math.abs(currentSpeed) - actualXZSpeed > 1.0f) {
                 currentSpeed = Math.signum(currentSpeed) * actualXZSpeed;
             }
         }
+        skipSpeedSync = false;
 
         if (isGrounded && avatar.getWorldLocation().y() >= -1.5f ) {
             // speeding up and slowing down
@@ -131,4 +133,6 @@ public class CarController {
     }
 
     public float getCurrentSpeed() { return currentSpeed; }
+    public void skipSpeedSyncOnce() { skipSpeedSync = true; }
+    public void reduceSpeed(float amount) { currentSpeed = Math.signum(currentSpeed) * Math.max(0f, Math.abs(currentSpeed) - amount); }
 }
