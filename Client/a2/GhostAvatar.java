@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.w3c.dom.Text;
 import tage.*;
 import org.joml.*;
 
@@ -19,6 +18,11 @@ public class GhostAvatar extends GameObject
 {
 	UUID uuid;
 	GameObject backLeftTire, backRightTire, frontLeftTire, frontRightTire;
+
+	private float rollAngle = 0f;
+	private float steerAngle = 0f;
+	private Vector3f prevPosition = null;
+	private static final float WHEEL_RADIUS = 0.6f;
 
 	public GhostAvatar(UUID id, ObjShape s, TextureImage t, Vector3f p, ObjShape ltS, ObjShape rtS, TextureImage tireT)
 	{	super(GameObject.root(), s, t);
@@ -36,6 +40,38 @@ public class GhostAvatar extends GameObject
 		frontRightTire.applyParentRotationToPosition(true);
 	}
 
+	public void updateRoll(Vector3f newPosition) {
+		if (prevPosition != null) {
+			float dist = newPosition.distance(prevPosition);
+			rollAngle += dist / WHEEL_RADIUS;
+		}
+		prevPosition = new Vector3f(newPosition);
+		applyTireRotations();
+	}
+
+	public void updateSteer(float wheelAngle) {
+		steerAngle = wheelAngle;
+		applyTireRotations();
+	}
+
+	private void applyTireRotations() {
+		applyTireRotation(frontLeftTire, steerAngle);
+		applyTireRotation(frontRightTire, steerAngle);
+		applyTireRotation(backLeftTire, 0f);
+		applyTireRotation(backRightTire, 0f);
+	}
+
+	private void applyTireRotation(GameObject tire, float steer) {
+		if (tire == null) return;
+		Vector3f t = new Vector3f();
+		tire.getLocalTranslation().getTranslation(t);
+		Vector3f s = tire.getLocalScale().getScale(new Vector3f());
+		Matrix4f rot = new Matrix4f().rotationY(steer).rotateX(rollAngle);
+		tire.setLocalRotation(rot);
+		tire.setLocalTranslation(new Matrix4f().translation(t));
+		tire.setLocalScale(new Matrix4f().scaling(s));
+	}
+
 	public void removeChildren() {
 		List<GameObject> childList = new ArrayList<>();
 		Iterator it = getChildrenIterator();
@@ -48,11 +84,10 @@ public class GhostAvatar extends GameObject
 			}
 		}
 	}
-	
+
 	public UUID getID() { return uuid; }
 	public void setPosition(Vector3f m) { setLocalLocation(m); }
 	public void setRotation(float m) { globalYaw(m); }
 	public Vector3f getPosition() { return getWorldLocation(); }
 	public void setNewTexture(TextureImage tex){ setTextureImage(tex);}
 }
-

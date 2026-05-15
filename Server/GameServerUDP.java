@@ -130,10 +130,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			}
 
 			// TURN --- Case where server receives a turn message
-			// Received Message Format: (turn,localId,angle)
+			// Received Message Format: (turn,localId,angle,wheelAngle)
 			if(messageTokens[0].compareTo("turn") == 0)
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
-				String[] rot = {messageTokens[2]};
+				String[] rot = {messageTokens[2], messageTokens[3]};
 				sendTurnMessages(clientID, rot);
 			}
 
@@ -456,11 +456,12 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// Informs a client that a remote clients avatar has changed rotation.
 	// This message is meant to be forwarded to all clients
 	// connected to the server when it receives a TURN message from the remote client.
-	// Message Format: (turn,remoteId,angle).
+	// Message Format: (turn,remoteId,yawDelta,wheelAngle).
 	public void sendTurnMessages(UUID clientID, String[] rotation)
 	{	try
 	{	String message = new String("turn," + clientID.toString());
 		message += "," + rotation[0];
+		message += "," + rotation[1];
 		forwardPacketToAll(message, clientID);
 	}
 	catch (IOException e)

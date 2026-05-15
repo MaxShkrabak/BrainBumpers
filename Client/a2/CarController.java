@@ -81,7 +81,7 @@ public class CarController {
                 float turnAmount = currentSpeed * Math.sin(wheelAngle * tightness) * dt;
                 if (turnAmount != 0f) {
                     avatar.globalYaw(turnAmount);
-                    if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount);
+                    if (isMultiplayer && protClient != null) protClient.sendTurnMessage(turnAmount, wheelAngle);
                 }
             }
         }

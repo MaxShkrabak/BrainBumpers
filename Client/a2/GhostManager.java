@@ -160,16 +160,18 @@ public class GhostManager
 	{	GhostAvatar ghostAvatar = findAvatar(id);
 		if (ghostAvatar != null)
 		{	ghostAvatar.setPosition(position);
+			ghostAvatar.updateRoll(position);
 		}
 		else
 		{	System.out.println("[SERVER]: Tried to update ghost avatar position, but unable to find ghost in list");
 		}
 	}
 
-	public void updateGhostAvatarRotation(UUID id, float rotation)
+	public void updateGhostAvatarRotation(UUID id, float rotation, float wheelAngle)
 	{	GhostAvatar ghostAvatar = findAvatar(id);
 		if (ghostAvatar != null)
 		{	ghostAvatar.setRotation(rotation);
+			ghostAvatar.updateSteer(wheelAngle);
 		}
 		else
 		{	System.out.println("[SERVER]: Tried to update ghost avatar rotation, but unable to find ghost in list");

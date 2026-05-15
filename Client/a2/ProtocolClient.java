@@ -141,17 +141,13 @@ public class ProtocolClient extends GameConnectionClient
 			}
 
 			// Handle TURN message
-			// Format: (turn,remoteId,angle)
+			// Format: (turn,remoteId,yawDelta,wheelAngle)
 			if (messageTokens[0].compareTo("turn") == 0)
 			{
-				// move a ghost avatar
-				// Parse out the id into a UUID
 				UUID ghostID = UUID.fromString(messageTokens[1]);
-
-				// Parse out the position into a float
 				float ghostRotation = Float.parseFloat(messageTokens[2]);
-
-				ghostManager.updateGhostAvatarRotation(ghostID, ghostRotation);
+				float ghostWheelAngle = messageTokens.length > 3 ? Float.parseFloat(messageTokens[3]) : 0f;
+				ghostManager.updateGhostAvatarRotation(ghostID, ghostRotation, ghostWheelAngle);
 			}
 
 			if (messageTokens[0].compareTo("wave") == 0)
@@ -319,11 +315,12 @@ public class ProtocolClient extends GameConnectionClient
 	}
 
 	// Informs the server that the local avatar has changed rotation.
-	// Message Format: (turn,localId,angle).
-	public void sendTurnMessage(float angle)
+	// Message Format: (turn,localId,angle,wheelAngle).
+	public void sendTurnMessage(float angle, float wheelAngle)
 	{	try
 	{	String message = new String("turn," + id.toString());
 		message += "," + angle;
+		message += "," + wheelAngle;
 
 		sendPacket(message);
 	} catch (IOException e)
