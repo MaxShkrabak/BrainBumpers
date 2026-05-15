@@ -98,6 +98,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				removeClient(clientID);
 
 				readyStatus.remove(clientID); // remove disconnected player from ready map
+				curPositions.remove(clientID);
 				scores.remove(clientID);
 			}
 			
@@ -349,7 +350,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	String message = new String("bye," + clientID.toString());
 			forwardPacketToAll(message, clientID);
 			//Notify all players that a player has left the game IN GAME
-			forwardPacketToAll("joinMsg", clientID);
+			forwardPacketToAll("byeMsg", clientID);
 		} 
 		catch (IOException e) 
 		{	e.printStackTrace();

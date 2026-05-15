@@ -49,7 +49,7 @@ public class MyGame extends VariableFrameRateGame {
             threeStoryBalcony2, pharmacySign2, twoStoryBalcony2, hardwareSign2, twoStoryColumns2, barbershopSign2, oneStory2, bakerySign2, twoStoryDouble2, bookshopSign2;
 
     private AnimatedShape zombieS;
-    private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS, rHomeS, houseS;
+    private ObjShape avatarS, ghostS, leftTireS, rightTireS, terrS, rHomeS, houseS;
     private ObjShape linxS, linyS, linzS;
     private ObjShape tallBuildingS, casinoS, casinoSignS, twoStoryWideS, twoStoryHomeS, twoStoryRoofS,
             threeStoryBalconyS, pharmacySignS, twoStoryBalconyS, hardwareSignS, twoStoryColumnsS, barbershopSignS,
@@ -164,10 +164,8 @@ public class MyGame extends VariableFrameRateGame {
         // car shapes
         avatarS = new ImportedModel("Car.obj");
         ghostS = new ImportedModel("Car.obj");
-        backLeftTireS = new ImportedModel("LeftTire.obj");
-        backRightTireS = new ImportedModel("RightTire.obj");
-        frontLeftTireS = new ImportedModel("LeftTire.obj");
-        frontRightTireS = new ImportedModel("RightTire.obj");
+        leftTireS = new ImportedModel("LeftTire.obj");
+        rightTireS = new ImportedModel("RightTire.obj");
 
         // zombie animation
         zombieS = new AnimatedShape("zombieMesh.rkm", "zombieSkeleton.rks");
@@ -235,10 +233,10 @@ public class MyGame extends VariableFrameRateGame {
         // car
         currSkinOpt = rn.nextInt(3);
         avatar = spawnObject(GameObject.root(), avatarS, avatarT[currSkinOpt], 10f, 20f, 15f, 2f, 0f);
-        backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
-        backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
-        frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);
-        frontRightTire = spawnObject(avatar, frontRightTireS, tireT, -0.38f, -0.18f, 0.63f, 1f, 0f);
+        backLeftTire = spawnObject(avatar, leftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
+        backRightTire = spawnObject(avatar, rightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
+        frontLeftTire = spawnObject(avatar, leftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);
+        frontRightTire = spawnObject(avatar, rightTireS, tireT, -0.38f, -0.18f, 0.63f, 1f, 0f);
 
         backLeftTire.applyParentRotationToPosition(true);
         backRightTire.applyParentRotationToPosition(true);
@@ -572,7 +570,6 @@ public class MyGame extends VariableFrameRateGame {
             updateHeadlights();
             wasMoving = true;
         } else if (wasMoving) {
-            // One final update when car just stopped
             updateHeadlights();
             wasMoving = false;
         }
@@ -952,7 +949,10 @@ public class MyGame extends VariableFrameRateGame {
     // ---------- NETWORKING SECTION ----------------
 
     public ObjShape getGhostShape() { return ghostS; }
+    public ObjShape getLeftTireShape() { return leftTireS; }
+    public ObjShape getRightTireShape() { return rightTireS; }
     public TextureImage getGhostTexture(int opt) { return avatarT[opt]; }
+    public TextureImage getTireTexture(){ return tireT; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
     public AnimatedShape getNPCShape() { return zombieS; }
