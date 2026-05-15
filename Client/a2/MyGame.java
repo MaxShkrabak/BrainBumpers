@@ -92,7 +92,7 @@ public class MyGame extends VariableFrameRateGame {
     private boolean isClientConnected = false;
 
     private IAudioManager audioMgr;
-    private Sound carEngineSound, ambientSound, splashSound;
+    private Sound carEngineSound, ambientSound, splashSound, casinoSound;
     Random rn = new Random();
 
     public MyGame(String serverAddress, int serverPort, String protocol)
@@ -134,31 +134,36 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadSounds()
-    { AudioResource resource1, resource2, resource3;
+    { AudioResource resource1, resource2, resource3, resource4;
         audioMgr = engine.getAudioManager();
-        resource1 = audioMgr.createAudioResource("carEngine.wav", AudioResourceType.AUDIO_SAMPLE);
-        resource2 = audioMgr.createAudioResource("creepy.wav", AudioResourceType.AUDIO_SAMPLE);
-        resource3 = audioMgr.createAudioResource("splash.wav", AudioResourceType.AUDIO_SAMPLE);
+        resource1 = audioMgr.createAudioResource("carEngine.wav", AudioResourceType.AUDIO_SAMPLE); // car sound
+        resource2 = audioMgr.createAudioResource("creepy.wav", AudioResourceType.AUDIO_SAMPLE);    // ambient sound
+        resource3 = audioMgr.createAudioResource("splash.wav", AudioResourceType.AUDIO_SAMPLE);    // zombie kill sound
+        resource4 = audioMgr.createAudioResource("casino.wav", AudioResourceType.AUDIO_SAMPLE);    // casino building sound
 
-        carEngineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 50, true);
-        ambientSound = new Sound(resource2, SoundType.SOUND_EFFECT, 60, true);
-        splashSound = new Sound(resource3, SoundType.SOUND_EFFECT, 100, false);
+        carEngineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 25, true);
+        ambientSound = new Sound(resource2, SoundType.SOUND_EFFECT, 20, true);
+        splashSound = new Sound(resource3, SoundType.SOUND_EFFECT, 40, false);
+        casinoSound = new Sound(resource4, SoundType.SOUND_EFFECT, 25, true);
 
         carEngineSound.initialize(audioMgr);
         ambientSound.initialize(audioMgr);
         splashSound.initialize(audioMgr);
+        casinoSound.initialize(audioMgr);
 
         carEngineSound.setMaxDistance(100.0f);
-        carEngineSound.setMinDistance(0.5f);
-        carEngineSound.setRollOff(5.0f);
+        carEngineSound.setMinDistance(2f);
+        carEngineSound.setRollOff(1.0f);
 
-        ambientSound.setMaxDistance(100.0f);
-        ambientSound.setMinDistance(5.0f);
-        ambientSound.setRollOff(1.0f);
+        ambientSound.setRollOff(0.0f);
 
         splashSound.setMaxDistance(100.0f);
-        splashSound.setMinDistance(1.0f);
-        splashSound.setRollOff(1.5f);
+        splashSound.setMinDistance(3.0f);
+        splashSound.setRollOff(1.0f);
+
+        casinoSound.setMaxDistance(1f);
+        casinoSound.setMinDistance(0.25f);
+        casinoSound.setRollOff(1.0f);
     }
 
     @Override
@@ -388,10 +393,12 @@ public class MyGame extends VariableFrameRateGame {
         carController = new CarController(avatar, frontLeftTire, frontRightTire, backLeftTire, backRightTire, protClient, isMultiplayerMode);
 
         carEngineSound.setLocation(avatar.getWorldLocation());
-        ambientSound.setLocation(tallBuilding.getWorldLocation());
+        ambientSound.setLocation(avatar.getWorldLocation());
+        casinoSound.setLocation(casino.getWorldLocation());
         setEarParameters();
         carEngineSound.play();
         ambientSound.play();
+        casinoSound.play();
 
         controlActions();
     }
@@ -558,7 +565,7 @@ public class MyGame extends VariableFrameRateGame {
 
             // Update positions
             carEngineSound.setLocation(avatar.getWorldLocation());
-            ambientSound.setLocation(tallBuilding.getWorldLocation());
+            ambientSound.setLocation(engine.getRenderSystem().getViewport("LEFT").getCamera().getLocation());
 
             setEarParameters();
 
@@ -659,7 +666,6 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         for (GhostNPC npc : toKill) {
-            playSplashAt(npc.getWorldLocation());
             carController.skipSpeedSyncOnce();
             carController.reduceSpeed(2f);
             protClient.sendKillMessage(npc.getID());
