@@ -25,5 +25,6 @@ public class GhostAvatar extends GameObject
 	public void setPosition(Vector3f m) { setLocalLocation(m); }
 	public void setRotation(float m) { globalYaw(m); }
 	public Vector3f getPosition() { return getWorldLocation(); }
+	public void setNewTexture(TextureImage tex){ setTextureImage(tex);}
 }
 

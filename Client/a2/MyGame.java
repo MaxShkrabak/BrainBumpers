@@ -40,18 +40,25 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, terr;
     private GameObject x, y, z; // world axes
-    private GameObject tallBuilding, casino, casinoSign, twoStoryWide1, twoStoryWide2, twoStoryWide3, twoStoryWide4, twoStoryWide5, rHome1, rHome2, rHome3, rHome4, house1, house2, house3,
-            twoStoryHome1, twoStoryHome2, twoStoryHome3, twoStoryHome4, twoStoryHome5,
+    private GameObject tallBuilding, casino, casinoSign,
+            twoStoryWide1, twoStoryWide2, twoStoryWide3, twoStoryWide4, twoStoryWide5, twoStoryWide6,
+            rHome1, rHome2, rHome3, rHome4, rHome5, rHome6, house1, house2, house3, house4, house5,
+            twoStoryHome1, twoStoryHome2, twoStoryHome3, twoStoryHome4, twoStoryHome5, twoStoryHome6,
             twoStoryRoof1, twoStoryRoof2, twoStoryRoof3, twoStoryRoof4, twoStoryRoof5, twoStoryRoof6, twoStoryRoof7,
-            threeStoryBalcony, pharmacySign, twoStoryBalcony, hardwareSign, twoStoryColumns, barbershopSign;
+            threeStoryBalcony1, pharmacySign1, twoStoryBalcony1, hardwareSign1, twoStoryColumns1, barbershopSign1, oneStory1, bakerySign1, twoStoryDouble1, bookshopSign1,
+            threeStoryBalcony2, pharmacySign2, twoStoryBalcony2, hardwareSign2, twoStoryColumns2, barbershopSign2, oneStory2, bakerySign2, twoStoryDouble2, bookshopSign2;
 
     private AnimatedShape zombieS;
     private ObjShape avatarS, ghostS, backLeftTireS, backRightTireS, frontLeftTireS, frontRightTireS, terrS, rHomeS, houseS;
     private ObjShape linxS, linyS, linzS;
     private ObjShape tallBuildingS, casinoS, casinoSignS, twoStoryWideS, twoStoryHomeS, twoStoryRoofS,
-            threeStoryBalconyS, pharmacySignS, twoStoryBalconyS, hardwareSignS, twoStoryColumnsS, barbershopSignS;;
+            threeStoryBalconyS, pharmacySignS, twoStoryBalconyS, hardwareSignS, twoStoryColumnsS, barbershopSignS,
+            oneStoryS, bakerySignS, twoStoryDoubleS, bookshopSignS;
 
-    private TextureImage avatarT, ghostT, tireT, zombieT, hills, road;
+    private TextureImage tireT, zombieT, hills, road;
+    private TextureImage[] avatarT = new TextureImage[3];
+    private int currSkinOpt = 0;
+
     private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2, rHomeT, houseT;
 
     private Light light1, moonLight, headLightsL, headLightsR;
@@ -86,6 +93,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private IAudioManager audioMgr;
     private Sound carEngineSound, ambientSound;
+    Random rn = new Random();
 
     public MyGame(String serverAddress, int serverPort, String protocol)
     {	super();
@@ -180,6 +188,10 @@ public class MyGame extends VariableFrameRateGame {
         hardwareSignS = new ImportedModel("SignHardware.obj");
         twoStoryColumnsS = new ImportedModel("TwoStoryColumns.obj");
         barbershopSignS = new ImportedModel("SignBarbershop.obj");
+        oneStoryS = new ImportedModel("OneStory.obj");
+        bakerySignS = new ImportedModel("SignBakery.obj");
+        twoStoryDoubleS = new ImportedModel("TwoStoryDouble.obj");
+        bookshopSignS = new ImportedModel("SignBookshop.obj");
 
         // terrain shape
         terrS = new TerrainPlane(200); // pixels per axis = 200x200
@@ -188,8 +200,9 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void loadTextures() {
         // car textures
-        avatarT = new TextureImage("CarTexture.png");
-        ghostT = new TextureImage("CarTexture.png");
+        avatarT[0] = new TextureImage("CarTexture1.png");
+        avatarT[1] = new TextureImage("CarTexture2.png");
+        avatarT[2] = new TextureImage("CarTexture3.png");
         tireT = new TextureImage("TireTexture.png");
 
         // zombie textures
@@ -220,7 +233,8 @@ public class MyGame extends VariableFrameRateGame {
         (z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
         // car
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT, 10f, 20f, 15f, 2f, 0f);
+        currSkinOpt = rn.nextInt(3);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT[currSkinOpt], 10f, 20f, 15f, 2f, 0f);
         backLeftTire = spawnObject(avatar, backLeftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
         backRightTire = spawnObject(avatar, backRightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
         frontLeftTire = spawnObject(avatar, frontLeftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);
@@ -231,8 +245,12 @@ public class MyGame extends VariableFrameRateGame {
         frontLeftTire.applyParentRotationToPosition(true);
         frontRightTire.applyParentRotationToPosition(true);
 
+        // zombies
+        // zombie = spawnObject(GameObject.root(), zombieS, zombieT, 25f, 15f, 14f, 0.50f, 230.0f);
+
+        // TODO: Update textures
         // buildings
-        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -20f, 0f, 10f, 2f, 270f);
+        tallBuilding = spawnObject(GameObject.root(), tallBuildingS, tallBuildingT, -20f, 0f, 10f, 2f, 180f);
         casino = spawnObject(GameObject.root(), casinoS, casinoT, 0f, 0f, -10f, 2f, 0f);
         casinoSign = spawnObject(casino, casinoSignS, casinoSignT, 0f, 0f, 0f, 1f, 0f);
         twoStoryWide1 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -35f, 0f, 10f, 2f, 90f);
@@ -240,35 +258,58 @@ public class MyGame extends VariableFrameRateGame {
         twoStoryWide3 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -25f, 0f, -10f, 2f, 270f);
         twoStoryWide4 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, -10f, 0f, 20f, 2f, 180f);
         twoStoryWide5 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT1, 3f, 0f, 20f, 2f, 180f);
+        twoStoryWide6 = spawnObject(GameObject.root(), twoStoryWideS, twoStoryWideT2, 20f, 0, 10, 2f, 0f);
         house1 = spawnObject(GameObject.root(), houseS, houseT, -30f, 0f, 25f, 2f, 90f);
         rHome1 = spawnObject(GameObject.root(), rHomeS, rHomeT, -30f, 0f, 30f, 2f, 90f);
         house2 = spawnObject(GameObject.root(), houseS, houseT, -30f, 0f, 20f, 2f, 90f);
         house3 = spawnObject(GameObject.root(), houseS, houseT, -20f, 0f, 25f, 2f, 270f);
+        house4 = spawnObject(GameObject.root(), houseS, houseT, 38f, 0f, -10f, 2f, 270f);
+        house5 = spawnObject(GameObject.root(), houseS, houseT, 38f, 0f, -15f, 2f, 270f);
         rHome2 = spawnObject(GameObject.root(), rHomeS, rHomeT, -20f, 0f, 30f, 2f, 270f);
         rHome3 = spawnObject(GameObject.root(), rHomeS, rHomeT, -20f, 0f, 20f, 2f, 270f);
         rHome4 = spawnObject(GameObject.root(), rHomeS, rHomeT, -25f, 0f, 35f, 2f, 180f);
+        rHome5 = spawnObject(GameObject.root(), rHomeS, rHomeT, 40f, 0, 15, 2f, 270f);
+        rHome6 = spawnObject(GameObject.root(), rHomeS, rHomeT, 38f, 0, 5, 2f, 270f);
         // TODO: stuff
 
-        twoStoryHome1 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome2 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome3 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome4 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
-        twoStoryHome5 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 30, 0, 25, 2f, 180f);
+        twoStoryHome1 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 21.5f, 2f, 90f);
+        twoStoryHome2 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 26.5f, 2f, 90f);
+        twoStoryHome3 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 31.5f, 2f, 90f);
+        twoStoryHome4 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 12.5f, 0, 36.5f, 2f, 90f);
+        twoStoryHome5 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 35f, 0, 10, 2f, 0f);
+        twoStoryHome6 = spawnObject(GameObject.root(), twoStoryHomeS, tallBuildingT, 38f, 0, 0, 2f, 270f);
 
-        twoStoryRoof1 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof2 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof3 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof4 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof5 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof6 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        twoStoryRoof7 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
+        twoStoryRoof1 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 21.5f, 2f, 270f);
+        twoStoryRoof2 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 26.5f, 2f, 270f);
+        twoStoryRoof3 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 31.5f, 2f, 270f);
+        twoStoryRoof4 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 25, 0, 36.5f, 2f, 270f);
+        twoStoryRoof5 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 30, 0, 20, 2f, 180f);
+        twoStoryRoof6 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 35, 0, 20, 2f, 180f);
+        twoStoryRoof7 = spawnObject(GameObject.root(), twoStoryRoofS, twoStoryWideT1, 38, 0, -5, 2f, 270f);
 
-        threeStoryBalcony = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        pharmacySign = spawnObject(GameObject.root(), pharmacySignS, twoStoryWideT1, 0, 8, 0, 2f, 180f);
-        twoStoryBalcony = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        hardwareSign = spawnObject(GameObject.root(), hardwareSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
-        twoStoryColumns = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, 35, 0, 35, 2f, 180f);
-        barbershopSign = spawnObject(GameObject.root(), barbershopSignS, twoStoryWideT1, 0, 5, 0, 2f, 180f);
+        // market buildings with signs by tower
+        threeStoryBalcony1 = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, -15, 0, 10, 2f, 180f);
+        pharmacySign1 = spawnObject(threeStoryBalcony1, pharmacySignS, casinoSignT, 0, 8.55f, -1.9f, 1f, 0f);
+        twoStoryBalcony1 = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, -10, 0, 10, 2f, 180f);
+        hardwareSign1 = spawnObject(twoStoryBalcony1, hardwareSignS, casinoSignT, 0, 5.7f, -1.9f, 1f, 0f);
+        twoStoryColumns1 = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, -5, 0, 10, 2f, 180f);
+        barbershopSign1 = spawnObject(twoStoryColumns1, barbershopSignS, casinoSignT, 0, 5.6f, -2.4f, 1f, 0f);
+        oneStory1 = spawnObject(GameObject.root(), oneStoryS, twoStoryWideT1, 0, 0, 10, 2f, 180f);
+        bakerySign1 = spawnObject(oneStory1, bakerySignS, casinoSignT, 0, 3.8f, -1.9f, 1f, 0f);
+        twoStoryDouble1 = spawnObject(GameObject.root(), twoStoryDoubleS, twoStoryWideT1, 5.7f, 0, 10, 2f, 180f);
+        bookshopSign1 = spawnObject(twoStoryDouble1, bookshopSignS, casinoSignT, -0.45f, 6.4f, -1.9f, 1f, 0f);
+
+        // other market buildings with signs
+        threeStoryBalcony2 = spawnObject(GameObject.root(), threeStoryBalconyS, twoStoryWideT1, 38, 0, -20, 2f, 270f);
+        pharmacySign2 = spawnObject(threeStoryBalcony2, pharmacySignS, casinoSignT, -1.9f, 8.55f, 0f, 1f, 0f);
+        twoStoryBalcony2 = spawnObject(GameObject.root(), twoStoryBalconyS, twoStoryWideT1, 38, 0, -25, 2f, 270f);
+        hardwareSign2 = spawnObject(twoStoryBalcony2, hardwareSignS, casinoSignT, -1.9f, 5.7f, 0f, 1f, 0f);
+        twoStoryColumns2 = spawnObject(GameObject.root(), twoStoryColumnsS, twoStoryWideT1, 38, 0, -30, 2f, 270f);
+        barbershopSign2 = spawnObject(twoStoryColumns2, barbershopSignS, casinoSignT, -2.4f, 5.6f, 0f, 1f, 0f);
+        oneStory2 = spawnObject(GameObject.root(), oneStoryS, twoStoryWideT1, 35, 0, -36, 2f, 315f);
+        bakerySign2 = spawnObject(oneStory2, bakerySignS, casinoSignT, -1.2f, 3.8f, 1.4f, 1f, 0f);
+        twoStoryDouble2 = spawnObject(GameObject.root(), twoStoryDoubleS, twoStoryWideT1, 28.25f, 0, -38f, 2f, 0f);
+        bookshopSign2 = spawnObject(twoStoryDouble2, bookshopSignS, casinoSignT, 0.45f, 6.4f, 1.9f, 1f, 0f);
 
         // terrain
         Matrix4f initialTranslation, initialScale;
@@ -403,17 +444,52 @@ public class MyGame extends VariableFrameRateGame {
         addHitbox(twoStoryWide3, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
         addHitbox(twoStoryWide4, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
         addHitbox(twoStoryWide5, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryWide6, 0, 13.3f, 5f, 4.05f, 0f, 2.5f, 0f);
 
         // house building
         addHitbox(house1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(house2, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(house3, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(house4, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(house5, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+
+        // two-story homes
+        addHitbox(twoStoryHome1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome2, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome3, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome4, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome5, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryHome6, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+
+        // two-story homes with roof
+        addHitbox(twoStoryRoof1, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof2, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof3, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof4, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof5, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof6, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+        addHitbox(twoStoryRoof7, 0, 4.5f, 5f, 4.5f, 0f, 2.5f, 0f);
+
+        // market buildings
+        addHitbox(threeStoryBalcony1, 0, 5f, 5f, 4.7f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryBalcony1, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryColumns1, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(oneStory1, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryDouble1, 0, 5.5f, 5f, 4.65f, .7f, 2.5f, 0.15f);
+
+        addHitbox(threeStoryBalcony2, 0, 5f, 5f, 4.7f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryBalcony2, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryColumns2, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(oneStory2, 0, 5f, 5f, 4.65f, .25f, 2.5f, 0.15f);
+        addHitbox(twoStoryDouble2, 0, 5.5f, 5f, 4.65f, .7f, 2.5f, 0.15f);
 
         // house with roof building
         addHitbox(rHome1, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(rHome2, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(rHome3, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
         addHitbox(rHome4, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(rHome5, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
+        addHitbox(rHome6, 0, 4.5f, 4f, 4.5f, 0f, 2f, 0f);
 
         // car hitbox
         float[] carSize = {1f, 0.6f, 2.5f};
@@ -615,6 +691,25 @@ public class MyGame extends VariableFrameRateGame {
     public void keyPressed(KeyEvent e) {
         if (!isGameOver) {
             switch (e.getKeyCode()) {
+
+                case KeyEvent.VK_Q:
+                    if (!isGameStarted || !isMultiplayerMode){
+                        currSkinOpt = (currSkinOpt + 1) % avatarT.length;
+                        avatar.setTextureImage(avatarT[currSkinOpt]);
+                        if(isMultiplayerMode && protClient != null){
+                            protClient.sendSetTexMessage(currSkinOpt);
+                        }
+                    }
+                    break;
+                case KeyEvent.VK_E:
+                    if (!isGameStarted || !isMultiplayerMode){
+                        currSkinOpt = (currSkinOpt - 1 + avatarT.length) % avatarT.length;
+                        avatar.setTextureImage(avatarT[currSkinOpt]);
+                        if(isMultiplayerMode && protClient != null){
+                            protClient.sendSetTexMessage(currSkinOpt);
+                        }
+                    }
+                    break;
                 case KeyEvent.VK_L:
                     if(isGameStarted || !isMultiplayerMode) {
                         headLightsL.toggleOnOff();
@@ -857,7 +952,7 @@ public class MyGame extends VariableFrameRateGame {
     // ---------- NETWORKING SECTION ----------------
 
     public ObjShape getGhostShape() { return ghostS; }
-    public TextureImage getGhostTexture() { return ghostT; }
+    public TextureImage getGhostTexture(int opt) { return avatarT[opt]; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
     public AnimatedShape getNPCShape() { return zombieS; }
@@ -923,10 +1018,10 @@ public class MyGame extends VariableFrameRateGame {
 
         Vector3f avatarPos = avatar.getWorldLocation();
 
-        Vector3f leftOffset  = new Vector3f(right).mul(-0.17f);
-        Vector3f rightOffset = new Vector3f(right).mul( 0.18f);
-        Vector3f frontOffset = new Vector3f(forward).mul(.55f);
-        Vector3f upOffset    = new Vector3f(up).mul(0.06f);
+        Vector3f leftOffset  = new Vector3f(right).mul(-0.2f);
+        Vector3f rightOffset = new Vector3f(right).mul( 0.2f);
+        Vector3f frontOffset = new Vector3f(forward).mul(.65f);
+        Vector3f upOffset    = new Vector3f(up).mul(0.1f);
 
         headLightsL.setLocation(new Vector3f(avatarPos).add(leftOffset).add(frontOffset).add(upOffset));
         headLightsR.setLocation(new Vector3f(avatarPos).add(rightOffset).add(frontOffset).add(upOffset));
