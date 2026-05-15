@@ -107,8 +107,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			if(messageTokens[0].compareTo("create") == 0)
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
 				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
-				System.out.println("[SERVER]: Creating Player " + clientID + " At X:" + pos[0] + " Y:" + pos[1] + " Z:" + pos[2]);
-				sendCreateMessages(clientID, pos);
+				int tex = Integer.parseInt(messageTokens[5]);
+				System.out.println("[SERVER]: Creating Player " + clientID + " At X:" + pos[0] + " Y:" + pos[1] + " Z:" + pos[2] + " with Tex: " + messageTokens[5]);
+				sendCreateMessages(clientID, pos, tex);
 				sendWantsDetailsMessages(clientID);
 			}
 			
@@ -118,7 +119,8 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			{	UUID clientID = UUID.fromString(messageTokens[1]);
 				UUID remoteID = UUID.fromString(messageTokens[2]);
 				String[] pos = {messageTokens[3], messageTokens[4], messageTokens[5]};
-				sendDetailsForMessage(clientID, remoteID, pos);
+				int tex = Integer.parseInt(messageTokens[6]);
+				sendDetailsForMessage(clientID, remoteID, pos, tex);
 			}
 			
 			// MOVE --- Case where server receives a move message
@@ -384,12 +386,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// connected to the server. 
 	// Message Format: (create,remoteId,x,y,z) where x, y, and z represent the position
 
-	public void sendCreateMessages(UUID clientID, String[] position)
+	public void sendCreateMessages(UUID clientID, String[] position, int tex)
 	{	try 
 		{	String message = new String("create," + clientID.toString());
 			message += "," + position[0];
 			message += "," + position[1];
-			message += "," + position[2];	
+			message += "," + position[2];
+			message += "," + tex;
 			forwardPacketToAll(message, clientID);
 		} 
 		catch (IOException e) 
@@ -402,12 +405,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// remoteId is used to send this message to the proper client. 
 	// Message Format: (dsfr,remoteId,x,y,z) where x, y, and z represent the position.
 
-	public void sendDetailsForMessage(UUID clientID, UUID remoteId, String[] position)
+	public void sendDetailsForMessage(UUID clientID, UUID remoteId, String[] position, int tex)
 	{	try 
 		{	String message = new String("dsfr," + remoteId.toString());
 			message += "," + position[0];
 			message += "," + position[1];
-			message += "," + position[2];	
+			message += "," + position[2];
+			message += "," + tex;
 			sendPacket(message, clientID);
 		} 
 		catch (IOException e) 

@@ -97,12 +97,12 @@ public class GhostManager
 	}
 
 	
-	public void createGhostAvatar(UUID id, Vector3f position, Matrix4f rotation) throws IOException
+	public void createGhostAvatar(UUID id, int tex, Vector3f position, Matrix4f rotation) throws IOException
 	{	System.out.println("[SERVER]: Adding ghost with ID --> " + id);
 		ObjShape s = game.getGhostShape();
 		ObjShape ltS = game.getLeftTireShape();
 		ObjShape rtS = game.getRightTireShape();
-		TextureImage gt = game.getGhostTexture(rn.nextInt(3));
+		TextureImage gt = game.getGhostTexture(tex);
 		TextureImage tt = game.getTireTexture();
 		GhostAvatar newAvatar = new GhostAvatar(id, s, gt, position, ltS, rtS, tt);
 		Matrix4f initialScale = (new Matrix4f()).scaling(2f);

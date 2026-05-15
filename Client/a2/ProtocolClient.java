@@ -45,7 +45,7 @@ public class ProtocolClient extends GameConnectionClient
 			{	if(messageTokens[1].compareTo("success") == 0)
 				{	System.out.println("[CLIENT]: Join success confirmed");
 					game.setIsConnected(true);
-					sendCreateMessage(game.getPlayerPosition());
+					sendCreateMessage(game.getPlayerPosition(), game.getCurrAvatarSkin());
 				}
 				if(messageTokens[1].compareTo("failure") == 0)
 				{	System.out.println("[CLIENT]: Join failure confirmed");
@@ -96,10 +96,12 @@ public class ProtocolClient extends GameConnectionClient
 					Float.parseFloat(messageTokens[3]),
 					Float.parseFloat(messageTokens[4]));
 
+				int tex = Integer.parseInt(messageTokens[5]);
+
 				Matrix4f ghostRotation = new Matrix4f();
 
 				try
-				{	ghostManager.createGhostAvatar(ghostID, ghostPosition, ghostRotation);
+				{	ghostManager.createGhostAvatar(ghostID, tex, ghostPosition, ghostRotation);
 				}	catch (IOException e)
 				{	System.err.println("[ERROR]: Error creating ghost avatar");
 				}
@@ -120,7 +122,7 @@ public class ProtocolClient extends GameConnectionClient
 				// Send the local client's avatar's information
 				// Parse out the id into a UUID
 				UUID ghostID = UUID.fromString(messageTokens[1]);
-				sendDetailsForMessage(ghostID, game.getPlayerPosition(), game.getPlayerRotation());
+				sendDetailsForMessage(ghostID, game.getPlayerPosition(), game.getCurrAvatarSkin());
 			}
 			
 			// Handle MOVE message
@@ -258,12 +260,13 @@ public class ProtocolClient extends GameConnectionClient
 	// with the server.
 	// Message Format: (create,localId,x,y,z) where x, y, and z represent the position
 
-	public void sendCreateMessage(Vector3f position)
+	public void sendCreateMessage(Vector3f position, int tex)
 	{	try 
 		{	String message = new String("create," + id.toString());
 			message += "," + position.x();
 			message += "," + position.y();
 			message += "," + position.z();
+			message += "," + tex;
 			
 			sendPacket(message);
 		} catch (IOException e) 
@@ -276,13 +279,14 @@ public class ProtocolClient extends GameConnectionClient
 	// from the server.
 	// Message Format: (dsfr,remoteId,localId,x,y,z) where x, y, and z represent the position.
 
-	public void sendDetailsForMessage(UUID remoteId, Vector3f position, Matrix4f angle)
+	public void sendDetailsForMessage(UUID remoteId, Vector3f position, int tex)
 	{	try 
 		{	String message = new String("dsfr," + remoteId.toString() + "," + id.toString());
 			message += "," + position.x();
 			message += "," + position.y();
 			message += "," + position.z();
-			message += "," + angle;
+			message += "," + tex;
+			//message += "," + angle;
 			
 			sendPacket(message);
 		} catch (IOException e) 
