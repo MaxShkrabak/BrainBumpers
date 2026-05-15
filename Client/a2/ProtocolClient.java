@@ -196,8 +196,10 @@ public class ProtocolClient extends GameConnectionClient
 			// confirms npc was ran over
 			if (messageTokens[0].compareTo("removeNPC") == 0)
 			{	int npcId = Integer.parseInt(messageTokens[1]);
+				Vector3f splashPos = ghostManager.getGhostNPCPosition(npcId);
 				ghostManager.removeGhostNPC(npcId);
 				game.zombieKilled();
+				if (splashPos != null) game.playSplashAt(splashPos);
 			}
 
 			// player scores
