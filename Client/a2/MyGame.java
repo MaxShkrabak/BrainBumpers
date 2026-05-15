@@ -971,6 +971,7 @@ public class MyGame extends VariableFrameRateGame {
     public ObjShape getLeftTireShape() { return leftTireS; }
     public ObjShape getRightTireShape() { return rightTireS; }
     public TextureImage getGhostTexture(int opt) { return avatarT[opt]; }
+    public int getCurrAvatarSkin() { return currSkinOpt; }
     public TextureImage getTireTexture(){ return tireT; }
     public GhostManager getGhostManager() { return gm; }
     public Engine getEngine() { return engine; }
