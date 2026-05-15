@@ -171,12 +171,36 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				}
 			}
 
+			if (messageTokens[0].compareTo("dead") == 0) {
+				UUID clientID = UUID.fromString(messageTokens[1]);
+				System.out.println("[SERVER]: Player " + clientID + " has died");
+				curPositions.remove(clientID);
+				sendPlayerDeadMessage(clientID);
+			}
+
 		}	}
+
+	public void sendPlayerDeadMessage(UUID clientID){
+		try {
+			String message = new String("playerDead," + clientID.toString());
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	// NPC STUFF
 
 	// --- additional protocol for NPCs ----
 
+	public void sendNPCattack(int npcID, UUID targetID) {
+		try {
+			String message = "npcAttack," + npcID;
+			sendPacket(message, targetID); // only send to the targeted player
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public void beginWave() {
 		isSpawning = true;
 		Random rn = new Random();
@@ -260,6 +284,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			));
 		}
 		return positions;
+	}
+	public HashMap<UUID, String[]> getCurPositions() {
+		return curPositions;
 	}
 
 	public void sendNPCinfo(NPC npc)
@@ -434,7 +461,8 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	// Message Format: (move,remoteId,x,y,z) where x, y, and z represent the position.
 
 	public void sendMoveMessages(UUID clientID, String[] position)
-	{	try 
+	{	if (!curPositions.containsKey(clientID)) return;
+		try
 		{	String message = new String("move," + clientID.toString());
 			message += "," + position[0];
 			message += "," + position[1];

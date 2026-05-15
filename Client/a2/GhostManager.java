@@ -130,6 +130,15 @@ public class GhostManager
 		}
 	}
 
+	public void hideGhostAvatar(UUID id) {
+		GhostAvatar ghost = findAvatar(id);
+		if (ghost != null) {
+			ghost.getRenderStates().disableRendering();
+			// hide tires too
+			ghost.hideChildren();
+		}
+	}
+
 	private GhostAvatar findAvatar(UUID id)
 	{	GhostAvatar ghostAvatar;
 		Iterator<GhostAvatar> it = ghostAvatars.iterator();

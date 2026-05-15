@@ -20,6 +20,7 @@ public class TurnAction extends AbstractInputAction {
 
     @Override
     public void performAction(float time, Event e) {
+        if(game.isSpectating() || game.isGameOver()) return;
         float keyValue = e.getValue();
         if (keyValue > -.2 && keyValue < .2) return; // deadzone
 

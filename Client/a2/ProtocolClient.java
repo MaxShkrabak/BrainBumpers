@@ -208,6 +208,19 @@ public class ProtocolClient extends GameConnectionClient
 					game.updatePlayerScore(pid, s);
 				}
 			}
+
+			// npc attacks you
+			if (messageTokens[0].compareTo("npcAttack") == 0)
+			{
+				int npcID = Integer.parseInt(messageTokens[1]);
+				game.handleNPCattack(npcID);
+			}
+
+			// another avatar died
+			if (messageTokens[0].compareTo("playerDead") == 0) {
+				UUID deadID = UUID.fromString(messageTokens[1]);
+				game.getGhostManager().hideGhostAvatar(deadID);
+			}
 		}	}
 
 	public void sendConfirmationMessage()
@@ -216,6 +229,15 @@ public class ProtocolClient extends GameConnectionClient
 	} catch (IOException e)
 	{	e.printStackTrace();
 	}	}
+
+	public void sendDeathMessage() {
+		try {
+			String message = "dead," + id.toString();
+			sendPacket(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	// The initial message from the game client requesting to join the 
 	// server. localId is a unique identifier for the client. Recommend 

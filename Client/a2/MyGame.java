@@ -1,6 +1,7 @@
 package a2;
 
 import com.jogamp.opengl.awt.GLCanvas;
+import org.joml.Random;
 import tage.*;
 import tage.input.InputManager;
 import tage.input.action.AbstractInputAction;
@@ -20,10 +21,8 @@ import tage.physics.PhysicsObject;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 import static tage.GameObject.spawnObject;
 
@@ -63,6 +62,8 @@ public class MyGame extends VariableFrameRateGame {
 
     private Light light1, moonLight, headLightsL, headLightsR;
 
+    private PlayerHealth playerHealth = new PlayerHealth();
+    private boolean isSpectating = false;
     private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
     private int score = 0, zombiesAlive=0;
@@ -998,6 +999,44 @@ public class MyGame extends VariableFrameRateGame {
                 break;
         }
     }
+
+    public void handleNPCattack(int npcID) {
+        playerHealth.takeDamage();
+        System.out.println("Hit by NPC " + npcID + "! HP: " + playerHealth.getCurrentHP());
+
+        if (playerHealth.isDead()) {
+            handleDeath();
+        }
+    }
+
+    private void handleDeath() {
+//        if(canSpectateSomeone()){
+//            isSpectating = true;
+//            System.out.println("You died! Entering spectate mode.");
+//        } else {
+//            isGameOver = true;
+//            System.out.println("You died! Game is over.");
+//        }
+        isSpectating = true;
+        System.out.println("You died! Entering spectate mode.");
+
+        carController.setThrottle(0f);
+        hideAvatar();
+
+        // Notify server
+        protClient.sendDeathMessage();
+    }
+    private void hideAvatar(){
+        avatar.getRenderStates().disableRendering();
+        backLeftTire.getRenderStates().disableRendering();
+        backRightTire.getRenderStates().disableRendering();
+        frontLeftTire.getRenderStates().disableRendering();
+        frontRightTire.getRenderStates().disableRendering();
+    }
+
+    public PlayerHealth getPlayerHealth() { return playerHealth; }
+    public boolean isSpectating() { return isSpectating; }
+    public boolean isGameOver() { return isGameOver; }
     public void setZombiesAlive(int alive){ zombiesAlive = alive; }
 
     private class SendCloseConnectionPacketAction extends AbstractInputAction
