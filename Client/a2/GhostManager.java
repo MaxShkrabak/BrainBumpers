@@ -88,7 +88,12 @@ public class GhostManager
 
 	
 	public void createGhostAvatar(UUID id, Vector3f position, Matrix4f rotation) throws IOException
-	{	System.out.println("[SERVER]: Adding ghost with ID --> " + id);
+	{
+		if (findAvatar(id) != null) {
+			System.out.println("[CLIENT]: Ghost " + id + " already exists, skipping");
+			return;
+		}
+		System.out.println("[SERVER]: Adding ghost with ID --> " + id);
 		ObjShape s = game.getGhostShape();
 		ObjShape ltS = game.getLeftTireShape();
 		ObjShape rtS = game.getRightTireShape();
