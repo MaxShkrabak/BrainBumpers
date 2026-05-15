@@ -98,6 +98,17 @@ public class NPCcontroller {
 //        //bt.insert(20, new GetBig(npc));
 //    }
 
+    public boolean removeNPC(int id) {
+        for (int i = 0; i < npcs.size(); i++) {
+            if (npcs.get(i).getID() == id) {
+                npcs.remove(i);
+                behaviorTrees.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public NPC getNPC(int index) {
         return npcs.get(index);
     }

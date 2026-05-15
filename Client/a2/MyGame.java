@@ -20,6 +20,10 @@ import tage.physics.PhysicsObject;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 
 import static tage.GameObject.spawnObject;
 
@@ -34,7 +38,7 @@ public class MyGame extends VariableFrameRateGame {
     private RotationController rc;
     private JumpController jc;
 
-    private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, zombie, terr;
+    private GameObject avatar, backLeftTire, backRightTire, frontLeftTire, frontRightTire, terr;
     private GameObject x, y, z; // world axes
     private GameObject tallBuilding, casino, casinoSign,
             twoStoryWide1, twoStoryWide2, twoStoryWide3, twoStoryWide4, twoStoryWide5, twoStoryWide6,
@@ -58,6 +62,8 @@ public class MyGame extends VariableFrameRateGame {
     private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2, rHomeT, houseT;
 
     private Light light1, moonLight, headLightsL, headLightsR;
+
+    private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
     private int score = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
@@ -518,6 +524,9 @@ public class MyGame extends VariableFrameRateGame {
             carController.update((float) moveTime, carPhysics, terr);
 
             (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
+            (engine.getSceneGraph()).getPhysicsEngine().detectCollisions();
+
+            checkZombieKills();
 
             // engine pitch
             float speed = Math.abs(carController.getCurrentSpeed());
@@ -620,7 +629,45 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getHUDmanager()).setHUD5("X:" + xloc + " Y:" + yloc + " Z:" + zloc, new Vector3f(1, 1, 1), vrX, vrY);
     }
 
-    // helper to change action message in hud
+    private void checkZombieKills() {
+        if (protClient == null) return;
+        PhysicsObject carPhysics = avatar.getPhysicsObject();
+        if (carPhysics == null || Math.abs(carController.getCurrentSpeed()) < KILL_SPEED_THRESHOLD) return;
+
+        HashSet<PhysicsObject> collided = carPhysics.getFullCollidedSet();
+        if (collided.isEmpty()) return;
+
+        Vector4f fwd = new Vector4f(0f, 0f, 1f, 1f);
+        fwd.mul(avatar.getWorldRotation());
+        Vector3f carFwd = new Vector3f(fwd.x(), fwd.y(), fwd.z());
+        Vector3f carPos = avatar.getWorldLocation();
+
+        List<GhostNPC> toKill = new ArrayList<>();
+        for (GhostNPC npc : gm.getGhostNPCs()) {
+            PhysicsObject npcPhysics = npc.getPhysicsObject();
+            if (npcPhysics == null || !collided.contains(npcPhysics)) continue;
+            Vector3f toNPC = new Vector3f(npc.getWorldLocation()).sub(carPos);
+            if (toNPC.dot(carFwd) <= 0) continue;
+            toKill.add(npc);
+        }
+
+        for (GhostNPC npc : toKill) {
+            carController.skipSpeedSyncOnce();
+            carController.reduceSpeed(2f);
+            protClient.sendKillMessage(npc.getID());
+        }
+    }
+
+    public void zombieKilled() {
+        zombiesAlive = Math.max(0, zombiesAlive - 1);
+    }
+
+    public void updatePlayerScore(UUID playerId, int newScore) {
+        if (protClient != null && protClient.getID().equals(playerId)) {
+            score = newScore;
+        }
+    }
+
     private void displayAction(String msg, float duration) {
         actionMsg = msg;
         actionTimer = (float) elapsTime + duration;

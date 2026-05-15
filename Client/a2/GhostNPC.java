@@ -50,11 +50,11 @@ public class GhostNPC extends GameObject {
 
         if (getPhysicsObject() != null) {
             getPhysicsObject().setTransform(
-                    new Vector3f(p.x, p.y + 0.3f, p.z),
+                    new Vector3f(p.x, p.y + 0.6f, p.z),
                     new Quaternionf().rotationY((float) Math.toRadians(rot))
             );
             Vector3f pos = getPhysicsObject().getLocation();
-            this.setLocalLocation(new Vector3f(pos.x, pos.y-0.3f, pos.z));
+            this.setLocalLocation(new Vector3f(pos.x, pos.y-0.6f, pos.z));
         } else {
             this.setLocalLocation(p);
         }
@@ -64,11 +64,11 @@ public class GhostNPC extends GameObject {
     public void setSize(boolean big)
     {
         if (!big) {
-            this.setLocalScale((new Matrix4f()).scaling(0.5f));
+            this.setLocalScale((new Matrix4f()).scaling(1.0f));
         }
         else
         {
-            this.setLocalScale((new Matrix4f()).scaling(1.0f));
+            this.setLocalScale((new Matrix4f()).scaling(2.0f));
         }
     }
 }
