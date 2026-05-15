@@ -92,7 +92,7 @@ public class MyGame extends VariableFrameRateGame {
     private boolean isClientConnected = false;
 
     private IAudioManager audioMgr;
-    private Sound carEngineSound, ambientSound;
+    private Sound carEngineSound, ambientSound, splashSound;
     Random rn = new Random();
 
     public MyGame(String serverAddress, int serverPort, String protocol)
@@ -134,16 +134,19 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadSounds()
-    { AudioResource resource1, resource2;
+    { AudioResource resource1, resource2, resource3;
         audioMgr = engine.getAudioManager();
         resource1 = audioMgr.createAudioResource("carEngine.wav", AudioResourceType.AUDIO_SAMPLE);
         resource2 = audioMgr.createAudioResource("creepy.wav", AudioResourceType.AUDIO_SAMPLE);
+        resource3 = audioMgr.createAudioResource("splash.wav", AudioResourceType.AUDIO_SAMPLE);
 
         carEngineSound = new Sound(resource1, SoundType.SOUND_EFFECT, 50, true);
         ambientSound = new Sound(resource2, SoundType.SOUND_EFFECT, 15, true);
+        splashSound = new Sound(resource3, SoundType.SOUND_EFFECT, 100, false);
 
         carEngineSound.initialize(audioMgr);
         ambientSound.initialize(audioMgr);
+        splashSound.initialize(audioMgr);
 
         carEngineSound.setMaxDistance(10.0f);
         carEngineSound.setMinDistance(0.5f);
@@ -152,6 +155,10 @@ public class MyGame extends VariableFrameRateGame {
         ambientSound.setMaxDistance(10.0f);
         ambientSound.setMinDistance(0.5f);
         ambientSound.setRollOff(5.0f);
+
+        splashSound.setMaxDistance(30.0f);
+        splashSound.setMinDistance(1.0f);
+        splashSound.setRollOff(1.5f);
     }
 
     @Override
@@ -652,6 +659,7 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         for (GhostNPC npc : toKill) {
+            playSplashAt(npc.getWorldLocation());
             carController.skipSpeedSyncOnce();
             carController.reduceSpeed(2f);
             protClient.sendKillMessage(npc.getID());
@@ -660,6 +668,11 @@ public class MyGame extends VariableFrameRateGame {
 
     public void zombieKilled() {
         zombiesAlive = Math.max(0, zombiesAlive - 1);
+    }
+
+    public void playSplashAt(Vector3f position) {
+        splashSound.setLocation(position);
+        splashSound.play();
     }
 
     public void updatePlayerScore(UUID playerId, int newScore) {

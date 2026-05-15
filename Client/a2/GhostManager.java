@@ -86,6 +86,16 @@ public class GhostManager
 		return ghostNPCs;
 	}
 
+	public Vector3f getGhostNPCPosition(int id) {
+		GhostNPC npc = findNPC(id);
+
+		if (npc == null) {
+			return null;
+		}
+
+		return new Vector3f(npc.getWorldLocation());
+	}
+
 	
 	public void createGhostAvatar(UUID id, Vector3f position, Matrix4f rotation) throws IOException
 	{	System.out.println("[SERVER]: Adding ghost with ID --> " + id);
