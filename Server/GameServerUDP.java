@@ -11,7 +11,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	NPCcontroller npcCtrl;
 
 	private static final int MIN_PLAYERS = 1;
-	private boolean gameStarted = false, isSpawning = false;
+	private boolean gameStarted = false, isSpawning = false, isGameOver = false;
 	private HashMap<UUID, String[]> curPositions = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 	private HashMap<UUID, Integer> scores = new HashMap<>();
@@ -27,7 +27,8 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	public void processPacket(Object o, InetAddress senderIP, int senderPort) {
 		String message = (String)o;
 		String[] messageTokens = message.split(",");
-		
+
+		if(isGameOver) return;
 		if(messageTokens.length > 0)
 		{	// JOIN -- Case where client just joined the server
 			// Received Message Format: (join,localId)
@@ -515,4 +516,6 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	e.printStackTrace();
 		}
 	}
+
+	public boolean getIsGameOver(){ return isGameOver; }
 }

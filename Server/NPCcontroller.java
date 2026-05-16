@@ -61,7 +61,7 @@ public class NPCcontroller {
     public List<Vector3f> getAllAvatarPositions() { return allAvatarPositions; }
     public void npcLoop()
     {
-        while (true) {
+        while (!server.getIsGameOver()) {
             long currentTime = System.nanoTime();
             float elapsedThinkMilliSecs =
                     (currentTime-lastThinkUpdateTime)/(1000000.0f);

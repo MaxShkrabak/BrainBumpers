@@ -156,7 +156,7 @@ public class GhostManager
 		return null;
 	}
 
-	private Vector<GhostAvatar> getGhostAvatars() {
+	public Vector<GhostAvatar> getGhostAvatars() {
 		return ghostAvatars;
 	}
 	
