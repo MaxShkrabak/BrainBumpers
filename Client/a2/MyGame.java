@@ -527,10 +527,10 @@ public class MyGame extends VariableFrameRateGame {
         double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
         elapsTime += moveTime;
 
-        if(isGameStarted || !isMultiplayerMode) {
-            carController.beginFrame();
-            im.update((float) moveTime);
+        carController.beginFrame();
+        im.update((float) moveTime);
 
+        if(isGameStarted || !isMultiplayerMode) {
             PhysicsObject carPhysics = avatar.getPhysicsObject();
 
             carController.update((float) moveTime, carPhysics, terr);
@@ -566,9 +566,9 @@ public class MyGame extends VariableFrameRateGame {
             ambientSound.setLocation(engine.getRenderSystem().getViewport("LEFT").getCamera().getLocation());
 
             setEarParameters();
-
-            orbitController.updateCameraPosition();
         }
+
+        orbitController.updateCameraPosition();
 
         updateHud();
 
@@ -703,6 +703,20 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
+    public void toggleHeadlights() {
+        if(isGameStarted || !isMultiplayerMode) {
+            headLightsL.toggleOnOff();
+            headLightsR.toggleOnOff();
+            updateHeadlights();
+        }
+    }
+
+    public void readyUp() {
+        if (isMultiplayerMode) {
+            protClient.sendReadyMessage();
+        }
+    }
+
     @Override
     public void keyPressed(KeyEvent e) {
         if (!isGameOver) {
@@ -727,11 +741,7 @@ public class MyGame extends VariableFrameRateGame {
                     }
                     break;
                 case KeyEvent.VK_L:
-                    if(isGameStarted || !isMultiplayerMode) {
-                        headLightsL.toggleOnOff();
-                        headLightsR.toggleOnOff();
-                        updateHeadlights();
-                    }
+                    toggleHeadlights();
                     break;
                 case KeyEvent.VK_X:
                     toggleAxes();
@@ -747,9 +757,7 @@ public class MyGame extends VariableFrameRateGame {
                     }
                     break;
                 case KeyEvent.VK_R:
-                    if (isMultiplayerMode) {
-                        protClient.sendReadyMessage();
-                    }
+                    readyUp();
                     break;
                 case KeyEvent.VK_T:
                     toggleRecenter();
@@ -796,6 +804,8 @@ public class MyGame extends VariableFrameRateGame {
 
         // gamepad controls
         GamepadAction toggleAxesGamepad = new GamepadAction(this, 'x');
+        GamepadAction toggleHeadlightsGamepad = new GamepadAction(this, 'y');
+        GamepadAction readyUpGamepad = new GamepadAction(this, 'b');
         MovAction movGamepad = new MovAction(this, -1.0f, protClient);
         TurnAction turnGamepad = new TurnAction(this, -1.0f, protClient);
 
@@ -808,6 +818,12 @@ public class MyGame extends VariableFrameRateGame {
                 InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllGamepads(
                 net.java.games.input.Component.Identifier.Button._2, toggleAxesGamepad,
+                InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllGamepads(
+                net.java.games.input.Component.Identifier.Button._3, toggleHeadlightsGamepad,
+                InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllGamepads(
+                net.java.games.input.Component.Identifier.Button._1, readyUpGamepad,
                 InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
         // keyboard controls
@@ -966,7 +982,6 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     // ---------- NETWORKING SECTION ----------------
-
     public ObjShape getGhostShape() { return ghostS; }
     public ObjShape getLeftTireShape() { return leftTireS; }
     public ObjShape getRightTireShape() { return rightTireS; }
@@ -1050,8 +1065,12 @@ public class MyGame extends VariableFrameRateGame {
         headLightsR.setDirection(lightDir);
     }
 
-    public void setThrottle(float input) { carController.setThrottle(input); }
-    public void turn(float delta) { carController.turn(delta); }
+    public void setThrottle(float input) {
+        if (isGameStarted || !isMultiplayerMode) carController.setThrottle(input);
+    }
+    public void turn(float delta) {
+        if (isGameStarted || !isMultiplayerMode) carController.turn(delta);
+    }
 
 }
 
