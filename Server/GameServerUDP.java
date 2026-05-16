@@ -10,7 +10,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 {
 	NPCcontroller npcCtrl;
 
-	private static final int MIN_PLAYERS = 1;
+	private static final int MIN_PLAYERS = 2;
 	private boolean gameStarted = false, isSpawning = false, isGameOver = false;
 	private HashMap<UUID, String[]> curPositions = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
@@ -207,7 +207,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	public void beginWave() {
 		isSpawning = true;
 		Random rn = new Random();
-		int genWave = rn.nextInt(3,5) * getClients().size();
+		int genWave = rn.nextInt(7,12) * getClients().size();
 
 		try {
 			System.out.println("[SERVER]: First wave has start with " + genWave + " Zombies!");

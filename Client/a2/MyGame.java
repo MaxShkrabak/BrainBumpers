@@ -244,7 +244,7 @@ public class MyGame extends VariableFrameRateGame {
 
         // car
         currSkinOpt = rn.nextInt(3);
-        avatar = spawnObject(GameObject.root(), avatarS, avatarT[currSkinOpt], 10f, 20f, 15f, 2f, 0f);
+        avatar = spawnObject(GameObject.root(), avatarS, avatarT[currSkinOpt], 12f, 15f, -5f, 2f, 0f);
         backLeftTire = spawnObject(avatar, leftTireS, tireT, 0.44f, -0.18f, -0.77f, 1f, 0f);
         backRightTire = spawnObject(avatar, rightTireS, tireT, -0.38f, -0.18f, -0.77f, 1f, 0f);
         frontLeftTire = spawnObject(avatar, leftTireS, tireT, 0.44f, -0.18f, 0.63f, 1f, 0f);

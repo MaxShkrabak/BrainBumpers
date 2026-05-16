@@ -44,7 +44,10 @@ public class NPCcontroller {
     public NPC spawnNPC()
     {
         NPC npc = new NPC(totalNPCcount);
-        npc.randomizeLocation(rn.nextInt(40), rn.nextInt(15));
+        npc.randomizeLocation(
+                -(rn.nextInt(21) + 20),
+                -(rn.nextInt(26) + 15)
+        );
         npcs.add(npc);
 
         //System.out.println("spawned npc at: " + Arrays.toString(npc.getLocation()));

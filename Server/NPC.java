@@ -22,7 +22,7 @@ public class NPC {
     public int getID() { return id; }
 
     public void randomizeLocation(int seedX, int seedZ) {
-        locationX = ((double) seedX) / 4.0;
+        locationX = seedX;
         locationY = 0;
         locationZ = seedZ;
     }
