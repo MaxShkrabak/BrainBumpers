@@ -632,6 +632,8 @@ public class MyGame extends VariableFrameRateGame {
         } else if (isSpectating) {
             statusColor = new Vector3f(1,1,1);
             gameStatusMsg = "Spectating a player";
+        } else {
+            gameStatusMsg = "Health: " + playerHealth.getCurrentHP() + " / " + playerHealth.getMaxHP();
         }
 
         // action message
