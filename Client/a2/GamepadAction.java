@@ -18,6 +18,13 @@ public class GamepadAction extends AbstractInputAction {
         if (button == 'x') {
             game.toggleAxes();
         }
+        else if (button == 'y') {
+            game.toggleHeadlights();
+        }
+        else if (button == 'b') {
+            game.readyUp();
+        }
+
     }
 }
 
