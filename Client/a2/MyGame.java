@@ -1,6 +1,7 @@
 package a2;
 
 import com.jogamp.opengl.awt.GLCanvas;
+import org.joml.Random;
 import tage.*;
 import tage.input.InputManager;
 import tage.input.action.AbstractInputAction;
@@ -20,10 +21,8 @@ import tage.physics.PhysicsObject;
 
 import java.io.*;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 import static tage.GameObject.spawnObject;
 
@@ -63,11 +62,12 @@ public class MyGame extends VariableFrameRateGame {
 
     private Light light1, casinoLight, headLightsL, headLightsR;
 
+    private PlayerHealth playerHealth = new PlayerHealth();
     private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
     private int score = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
-    private boolean isGameStarted = false, isGameOver = false, isGameWon = false, showAxes = false, showPhysics = false;
+    private boolean isGameStarted = false, isGameOver = false, isGameWon = false, isSpectating = false, showAxes = false, showPhysics = false;
     private boolean wasMoving = false;
 
     private String actionMsg = "";
@@ -529,49 +529,81 @@ public class MyGame extends VariableFrameRateGame {
         double moveTime = (currFrameTime - lastFrameTime) / 1000.0;
         elapsTime += moveTime;
 
-        carController.beginFrame();
-        im.update((float) moveTime);
-
         if(isGameStarted || !isMultiplayerMode) {
-            PhysicsObject carPhysics = avatar.getPhysicsObject();
-
-            carController.update((float) moveTime, carPhysics, terr);
-
-            (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
-            (engine.getSceneGraph()).getPhysicsEngine().detectCollisions();
-
-            checkZombieKills();
-
-            // engine pitch
-            float speed = Math.abs(carController.getCurrentSpeed());
-            float maxSpeed = 14.0f; // Matches MAX_SPEED in CarController
-
-            // starts pitch at 1.0 (idle) and reaches 2.0 at max speed
-            float enginePitch = 1.0f + (speed / maxSpeed);
-            carEngineSound.setPitch(enginePitch);
-
-            if (carPhysics != null) {
-                Vector3f physLoc = carPhysics.getLocation();
-                Quaternionf avatarRot = new Quaternionf();
-                avatar.getWorldRotation().getNormalizedRotation(avatarRot);
-                Vector3f sideShift = new Vector3f(-0.03f, 0f, 0f).rotate(avatarRot); // fixes hitbox being too far right
-                avatar.setLocalLocation(new Vector3f(physLoc.x + sideShift.x, physLoc.y + 0.05f, physLoc.z + sideShift.z));
-                carPhysics.setTransform(physLoc, avatarRot);
-                carPhysics.setAngularVelocity(new float[]{0f, 0f, 0f});
-
-                float[] v = carPhysics.getLinearVelocity();
-                carEngineSound.setVelocity(new Vector3f(v[0], v[1], v[2]));
-            }
-
-            // Update positions
-            carEngineSound.setLocation(avatar.getWorldLocation());
-            ambientSound.setLocation(engine.getRenderSystem().getViewport("LEFT").getCamera().getLocation());
-
             setEarParameters();
+            if (!isSpectating) {
+                carController.beginFrame();
+                im.update((float) moveTime);
+
+                PhysicsObject carPhysics = avatar.getPhysicsObject();
+                carController.update((float) moveTime, carPhysics, terr);
+
+                (engine.getSceneGraph()).getPhysicsEngine().update((float) moveTime);
+                (engine.getSceneGraph()).getPhysicsEngine().detectCollisions();
+
+                checkZombieKills();
+
+                // engine pitch
+                float speed = Math.abs(carController.getCurrentSpeed());
+                float maxSpeed = 14.0f; // Matches MAX_SPEED in CarController
+
+                // starts pitch at 1.0 (idle) and reaches 2.0 at max speed
+                float enginePitch = 1.0f + (speed / maxSpeed);
+                carEngineSound.setPitch(enginePitch);
+
+                if (carPhysics != null) {
+                    Vector3f physLoc = carPhysics.getLocation();
+                    Quaternionf avatarRot = new Quaternionf();
+                    avatar.getWorldRotation().getNormalizedRotation(avatarRot);
+                    Vector3f sideShift = new Vector3f(-0.03f, 0f, 0f).rotate(avatarRot); // fixes hitbox being too far right
+                    avatar.setLocalLocation(new Vector3f(physLoc.x + sideShift.x, physLoc.y + 0.05f, physLoc.z + sideShift.z));
+                    carPhysics.setTransform(physLoc, avatarRot);
+                    carPhysics.setAngularVelocity(new float[]{0f, 0f, 0f});
+
+                    float[] v = carPhysics.getLinearVelocity();
+                    carEngineSound.setVelocity(new Vector3f(v[0], v[1], v[2]));
+                }
+
+                carEngineSound.setLocation(avatar.getWorldLocation());
+                ambientSound.setLocation(tallBuilding.getWorldLocation());
+
+                orbitController.updateCameraPosition();
+
+                boolean isMoving = Math.abs(carController.getCurrentSpeed()) > 0.01f;
+                if (isMoving) {
+                    updateHeadlights();
+                    wasMoving = true;
+                } else if (wasMoving) {
+                    updateHeadlights();
+                    wasMoving = false;
+                }
+
+            } else {
+                // Spectate mode — follow first alive ghost
+                boolean foundTarget = false;
+                for (GhostAvatar ghost : gm.getGhostAvatars()) {
+                    if (ghost.getRenderStates().renderingEnabled()) {
+                        Vector3f ghostPos = ghost.getWorldLocation();
+                        Vector3f ghostFwd = ghost.getWorldForwardVector();
+                        Vector3f camPos = new Vector3f(ghostPos)
+                                .sub(new Vector3f(ghostFwd).mul(8f))
+                                .add(0f, 5f, 0f);
+                        engine.getRenderSystem().getViewport("LEFT").getCamera().setLocation(camPos);
+                        engine.getRenderSystem().getViewport("LEFT").getCamera().lookAt(ghost);
+                        foundTarget = true;
+                        break;
+                    }
+                }
+                if (!foundTarget) {
+                    if(!isGameOver){
+                        if(protClient.getCurrentTopScore() == protClient.getID()){
+                            isGameWon = true;
+                        }
+                        isGameOver = true;
+                    }
+                }
+            }
         }
-
-        orbitController.updateCameraPosition();
-
         updateHud();
 
         if (isMultiplayerMode) {
@@ -579,16 +611,6 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         zombieS.updateAnimation();
-
-        boolean isMoving = Math.abs(carController.getCurrentSpeed()) > 0.01f;
-
-        if (isMoving) {
-            updateHeadlights();
-            wasMoving = true;
-        } else if (wasMoving) {
-            updateHeadlights();
-            wasMoving = false;
-        }
     }
 
     private void updateHud() {
@@ -601,11 +623,15 @@ public class MyGame extends VariableFrameRateGame {
         Vector3f statusColor = new Vector3f(0, 1, 0);
 
         if (isGameOver) {
-            mouseModeInitiated = false;
-            gameStatusMsg = "You lost.";
-            statusColor = new Vector3f(1, 0, 0);
-        } else if (isGameWon) {
-            gameStatusMsg = "You Win!";
+            if (isGameWon){
+                gameStatusMsg = "You WIN with a score of " + score + "!";
+            } else {
+                gameStatusMsg = "GAME OVER! You lost...";
+                statusColor = new Vector3f(1, 0, 0);
+            }
+        } else if (isSpectating) {
+            statusColor = new Vector3f(1,1,1);
+            gameStatusMsg = "Spectating a player";
         }
 
         // action message
@@ -721,63 +747,66 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (!isGameOver) {
-            switch (e.getKeyCode()) {
-
-                case KeyEvent.VK_Q:
-                    if (!isGameStarted || !isMultiplayerMode){
-                        currSkinOpt = (currSkinOpt + 1) % avatarT.length;
-                        avatar.setTextureImage(avatarT[currSkinOpt]);
-                        if(isMultiplayerMode && protClient != null){
-                            protClient.sendSetTexMessage(currSkinOpt);
-                        }
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_Q:
+                if (!isGameStarted || !isMultiplayerMode){
+                    currSkinOpt = (currSkinOpt + 1) % avatarT.length;
+                    avatar.setTextureImage(avatarT[currSkinOpt]);
+                    if(isMultiplayerMode && protClient != null){
+                        protClient.sendSetTexMessage(currSkinOpt);
                     }
-                    break;
-                case KeyEvent.VK_E:
-                    if (!isGameStarted || !isMultiplayerMode){
-                        currSkinOpt = (currSkinOpt - 1 + avatarT.length) % avatarT.length;
-                        avatar.setTextureImage(avatarT[currSkinOpt]);
-                        if(isMultiplayerMode && protClient != null){
-                            protClient.sendSetTexMessage(currSkinOpt);
-                        }
+                }
+                break;
+            case KeyEvent.VK_E:
+                if (!isGameStarted || !isMultiplayerMode){
+                    currSkinOpt = (currSkinOpt - 1 + avatarT.length) % avatarT.length;
+                    avatar.setTextureImage(avatarT[currSkinOpt]);
+                    if(isMultiplayerMode && protClient != null){
+                        protClient.sendSetTexMessage(currSkinOpt);
                     }
-                    break;
-                case KeyEvent.VK_L:
-                    toggleHeadlights();
-                    break;
-                case KeyEvent.VK_X:
-                    toggleAxes();
-                    break;
-                case KeyEvent.VK_Z:
-                    if (isMultiplayerMode) {
-                        if (protClient != null && isClientConnected)
-                        {	protClient.sendByeMessage();
-                            setIsConnected(false);
-                            shutdown();
-                            System.exit(0);
-                        }
+                }
+                break;
+            case KeyEvent.VK_L:
+                if(isGameStarted || !isMultiplayerMode) {
+                    headLightsL.toggleOnOff();
+                    headLightsR.toggleOnOff();
+                    updateHeadlights();
+                }
+                break;
+            case KeyEvent.VK_X:
+                toggleAxes();
+                break;
+            case KeyEvent.VK_Z:
+                if (isMultiplayerMode) {
+                    if (protClient != null && isClientConnected)
+                    {	protClient.sendByeMessage();
+                        setIsConnected(false);
+                        shutdown();
+                        System.exit(0);
                     }
-                    break;
-                case KeyEvent.VK_R:
-                    readyUp();
-                    break;
-                case KeyEvent.VK_T:
-                    toggleRecenter();
-                    break;
-                case KeyEvent.VK_C:
-                 zombieS.stopAnimation();
-                    zombieS.playAnimation("RUN", 0.45f,
-                            AnimatedShape.EndType.LOOP, 0);
-                    break;
-                case KeyEvent.VK_SPACE:
-                    if (!showPhysics) {
-                        engine.enablePhysicsWorldRender();
-                        showPhysics = true;
-                    } else {
-                        engine.disablePhysicsWorldRender();
-                        showPhysics = false;
-                    }
-            }
+                }
+                break;
+            case KeyEvent.VK_R:
+                if (isMultiplayerMode) {
+                    protClient.sendReadyMessage();
+                }
+                break;
+            case KeyEvent.VK_T:
+                toggleRecenter();
+                break;
+            case KeyEvent.VK_C:
+                zombieS.stopAnimation();
+                zombieS.playAnimation("RUN", 0.45f,
+                        AnimatedShape.EndType.LOOP, 0);
+                break;
+            case KeyEvent.VK_SPACE:
+                if (!showPhysics) {
+                    engine.enablePhysicsWorldRender();
+                    showPhysics = true;
+                } else {
+                    engine.disablePhysicsWorldRender();
+                    showPhysics = false;
+                }
         }
         super.keyPressed(e);
     }
@@ -1035,6 +1064,39 @@ public class MyGame extends VariableFrameRateGame {
                 break;
         }
     }
+
+    public void handleNPCattack(int npcID) {
+        playerHealth.takeDamage();
+        System.out.println("Hit by NPC " + npcID + "! HP: " + playerHealth.getCurrentHP());
+
+        if (playerHealth.isDead()) {
+            handleDeath();
+        }
+    }
+
+    private void handleDeath() {
+        isSpectating = true;
+        System.out.println("You died!");
+
+        carController.setThrottle(0f);
+        hideAvatar();
+        carEngineSound.stop();
+
+        // Notify server
+        protClient.sendDeathMessage();
+    }
+    private void hideAvatar(){
+        avatar.getRenderStates().disableRendering();
+        backLeftTire.getRenderStates().disableRendering();
+        backRightTire.getRenderStates().disableRendering();
+        frontLeftTire.getRenderStates().disableRendering();
+        frontRightTire.getRenderStates().disableRendering();
+    }
+
+    public PlayerHealth getPlayerHealth() { return playerHealth; }
+    public boolean isSpectating() { return isSpectating; }
+    public boolean isGameOver() { return isGameOver; }
+    public boolean isGameWon() { return isGameWon; }
     public void setZombiesAlive(int alive){ zombiesAlive = alive; }
 
     private class SendCloseConnectionPacketAction extends AbstractInputAction

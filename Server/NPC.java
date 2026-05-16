@@ -124,6 +124,4 @@ public class NPC {
         if (Math.abs(diff) <= speed) return target;
         return current + Math.signum(diff) * speed;
     }
-
-    public void moveTowardAvatar(Vector3f avatarPos) { }
 }

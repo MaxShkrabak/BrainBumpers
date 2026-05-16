@@ -98,7 +98,12 @@ public class GhostManager
 
 	
 	public void createGhostAvatar(UUID id, int tex, Vector3f position, Matrix4f rotation) throws IOException
-	{	System.out.println("[SERVER]: Adding ghost with ID --> " + id);
+	{
+		if (findAvatar(id) != null) {
+			System.out.println("[CLIENT]: Ghost " + id + " already exists, skipping");
+			return;
+		}
+		System.out.println("[SERVER]: Adding ghost with ID --> " + id);
 		ObjShape s = game.getGhostShape();
 		ObjShape ltS = game.getLeftTireShape();
 		ObjShape rtS = game.getRightTireShape();
@@ -140,6 +145,15 @@ public class GhostManager
 		}
 	}
 
+	public void hideGhostAvatar(UUID id) {
+		GhostAvatar ghost = findAvatar(id);
+		if (ghost != null) {
+			ghost.getRenderStates().disableRendering();
+			// hide tires too
+			ghost.hideChildren();
+		}
+	}
+
 	private GhostAvatar findAvatar(UUID id)
 	{	GhostAvatar ghostAvatar;
 		Iterator<GhostAvatar> it = ghostAvatars.iterator();
@@ -152,7 +166,7 @@ public class GhostManager
 		return null;
 	}
 
-	private Vector<GhostAvatar> getGhostAvatars() {
+	public Vector<GhostAvatar> getGhostAvatars() {
 		return ghostAvatars;
 	}
 	

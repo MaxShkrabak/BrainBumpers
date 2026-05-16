@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.joml.Vector3f;
 import tage.ai.behaviortrees.BTCompositeType;
+import tage.ai.behaviortrees.BTSelector;
 import tage.ai.behaviortrees.BTSequence;
 import tage.ai.behaviortrees.BehaviorTree;
 
 public class NPCcontroller {
 
     private List<NPC> npcs = new ArrayList<>();
+    List<Vector3f> allAvatarPositions;
     private int totalNPCcount = 1;
     private List<BehaviorTree> behaviorTrees = new ArrayList<>();
 
@@ -47,17 +49,19 @@ public class NPCcontroller {
 
         //System.out.println("spawned npc at: " + Arrays.toString(npc.getLocation()));
         BehaviorTree bt = new BehaviorTree(BTCompositeType.SELECTOR);
-        bt.insertAtRoot(new BTSequence(10));
+        bt.insertAtRoot(new BTSelector(10));
+        bt.insert(10, new AttackAvatar(server, this, npc));
         bt.insert(10, new MoveToAvatar(server, this, npc));
-        behaviorTrees.add(bt);
 
+        behaviorTrees.add(bt);
         totalNPCcount++;
         return npc;
     }
 
+    public List<Vector3f> getAllAvatarPositions() { return allAvatarPositions; }
     public void npcLoop()
     {
-        while (true) {
+        while (!server.getIsGameOver()) {
             long currentTime = System.nanoTime();
             float elapsedThinkMilliSecs =
                     (currentTime-lastThinkUpdateTime)/(1000000.0f);
@@ -66,7 +70,7 @@ public class NPCcontroller {
 
             if (elapsedTickMilliSecs >= 35.0f) {
                 lastTickUpdateTime = currentTime;
-                List<Vector3f> allAvatarPositions = server.getAllAvatarPositions();
+                allAvatarPositions = server.getAllAvatarPositions();
 
                 if (!server.getIsSpawning()) {
                     for (NPC npc : npcs) {

@@ -85,6 +85,16 @@ public class GhostAvatar extends GameObject
 		}
 	}
 
+	public void hideChildren() {
+		Iterator it = getChildrenIterator();
+		while (it.hasNext()) {
+			GameObject child = (GameObject) it.next();
+			if (child != null) {
+				child.getRenderStates().disableRendering();
+			}
+		}
+	}
+
 	public UUID getID() { return uuid; }
 	public void setPosition(Vector3f m) { setLocalLocation(m); }
 	public void setRotation(float m) { globalYaw(m); }

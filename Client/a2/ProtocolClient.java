@@ -3,9 +3,8 @@ package a2;
 import java.awt.Color;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Iterator;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.*;
+
 import org.joml.*;
 
 import tage.*;
@@ -18,6 +17,7 @@ public class ProtocolClient extends GameConnectionClient
 	private UUID id;
 	private GhostNPC ghostNPC;
 	private int ghostCounter = 0;
+	private HashMap<UUID, Integer> lobbyScores = new HashMap<>();
 	
 	public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException
 	{	super(remoteAddr, remotePort, protocolType);
@@ -46,6 +46,7 @@ public class ProtocolClient extends GameConnectionClient
 				{	System.out.println("[CLIENT]: Join success confirmed");
 					game.setIsConnected(true);
 					sendCreateMessage(game.getPlayerPosition(), game.getCurrAvatarSkin());
+					lobbyScores.put(id, 0);
 				}
 				if(messageTokens[1].compareTo("failure") == 0)
 				{	System.out.println("[CLIENT]: Join failure confirmed");
@@ -102,6 +103,7 @@ public class ProtocolClient extends GameConnectionClient
 
 				try
 				{	ghostManager.createGhostAvatar(ghostID, tex, ghostPosition, ghostRotation);
+					lobbyScores.put(ghostID,0);
 				}	catch (IOException e)
 				{	System.err.println("[ERROR]: Error creating ghost avatar");
 				}
@@ -205,17 +207,56 @@ public class ProtocolClient extends GameConnectionClient
 			{	for (int i = 1; i + 1 < messageTokens.length; i += 2)
 				{	UUID pid = UUID.fromString(messageTokens[i]);
 					int s = Integer.parseInt(messageTokens[i + 1]);
+					updateLobbyScore(pid, s);
 					game.updatePlayerScore(pid, s);
 				}
 			}
+
+			// npc attacks you
+			if (messageTokens[0].compareTo("npcAttack") == 0)
+			{
+				int npcID = Integer.parseInt(messageTokens[1]);
+				game.handleNPCattack(npcID);
+			}
+
+			// another avatar died
+			if (messageTokens[0].compareTo("playerDead") == 0) {
+				UUID deadID = UUID.fromString(messageTokens[1]);
+				game.getGhostManager().hideGhostAvatar(deadID);
+			}
 		}	}
 
+	public UUID getCurrentTopScore() {
+		UUID topUUID = null;
+		int topScore = 1;
+
+		for (Map.Entry<UUID, Integer> entry : lobbyScores.entrySet()) {
+			if (entry.getValue() >= topScore) {
+				topScore = entry.getValue();
+				topUUID = entry.getKey();
+			}
+		}
+
+		return topUUID;
+	}
+	private void updateLobbyScore(UUID player, int score){
+		lobbyScores.put(player, score);
+	}
 	public void sendConfirmationMessage()
 	{	try
 	{	sendPacket(new String("confirm," + id.toString()));
 	} catch (IOException e)
 	{	e.printStackTrace();
 	}	}
+
+	public void sendDeathMessage() {
+		try {
+			String message = "dead," + id.toString();
+			sendPacket(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	// The initial message from the game client requesting to join the 
 	// server. localId is a unique identifier for the client. Recommend 
