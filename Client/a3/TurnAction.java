@@ -1,4 +1,4 @@
-package a2;
+package a3;
 
 import tage.GameObject;
 import tage.input.action.AbstractInputAction;

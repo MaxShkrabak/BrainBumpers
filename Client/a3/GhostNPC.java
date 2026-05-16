@@ -1,12 +1,10 @@
-package a2;
+package a3;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Matrix4f;
 import tage.*;
 import tage.shapes.AnimatedShape;
-
-import java.util.Vector;
 
 public class GhostNPC extends GameObject {
     private int id;

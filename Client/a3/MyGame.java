@@ -1,4 +1,4 @@
-package a2;
+package a3;
 
 import com.jogamp.opengl.awt.GLCanvas;
 import org.joml.Random;

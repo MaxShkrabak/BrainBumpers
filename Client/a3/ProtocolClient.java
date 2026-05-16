@@ -1,13 +1,11 @@
-package a2;
+package a3;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.*;
 
 import org.joml.*;
 
-import tage.*;
 import tage.networking.client.GameConnectionClient;
 
 public class ProtocolClient extends GameConnectionClient
