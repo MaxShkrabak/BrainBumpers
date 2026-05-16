@@ -61,7 +61,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private TextureImage tallBuildingT, casinoT, casinoSignT, twoStoryWideT1, twoStoryWideT2, rHomeT, houseT;
 
-    private Light light1, moonLight, headLightsL, headLightsR;
+    private Light light1, casinoLight, headLightsL, headLightsR;
 
     private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
@@ -340,7 +340,9 @@ public class MyGame extends VariableFrameRateGame {
         light1.setLocation(new Vector3f(5.0f, 4.0f, 2.0f));
         (engine.getSceneGraph()).addLight(light1);
 
-        moonLight = setLight(new Vector3f(0f, 10f, 0f), 5f, 0f, 3f); // TODO: If we change the skybox to include a moon
+        Vector3f casinoLoc = casino.getWorldLocation();
+        casinoLoc.y += 10f;
+        casinoLight = setLight(casinoLoc, 5f, 0f, 0f);
 
         headLightsL = new Light();
         headLightsR = new Light();
