@@ -152,6 +152,17 @@ public class ProtocolClient extends GameConnectionClient
 				game.setZombiesAlive(Integer.parseInt(messageTokens[1]));
 			}
 
+			if (messageTokens[0].compareTo("waveMsg") == 0)
+			{
+				int waveCount = Integer.parseInt(messageTokens[1]);
+
+				System.out.println("[ GAME ]: Wave " + waveCount + " is about to start...");
+				if (waveCount > 1) {
+					String waveMsg = new String("waveMsg," + waveCount);
+					game.showChatMessage(waveMsg);
+				}
+			}
+
 			if (messageTokens[0].compareTo("createNPC") == 0)
 			{
 				int NPCid = Integer.parseInt(messageTokens[1]);

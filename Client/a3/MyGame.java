@@ -65,7 +65,7 @@ public class MyGame extends VariableFrameRateGame {
     private PlayerHealth playerHealth = new PlayerHealth();
     private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
-    private int score = 0, winnerScore = 0, zombiesAlive=0;
+    private int score = 0, winnerScore = 0, waveCounter = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
     private boolean isGameStarted = false, isGameOver = false, isGameWon = false, isSpectating = false, showAxes = false, showPhysics = false;
     private boolean wasMoving = false;
@@ -1057,7 +1057,8 @@ public class MyGame extends VariableFrameRateGame {
 
     public void setIsConnected(boolean value) { this.isClientConnected = value; }
     public void showChatMessage(String msgType){
-        switch (msgType) {
+        String[] msg = msgType.split(",");
+        switch (msg[0]) {
             case "joinMsg":
                 displayAction("A Player has joined the game!", 2);
                 break;
@@ -1067,6 +1068,11 @@ public class MyGame extends VariableFrameRateGame {
             case "startMsg":
                 displayAction("The game has been started, good luck!", 2);
                 isGameStarted = true;
+                break;
+            case "waveMsg":
+                waveCounter = Integer.parseInt(msg[1]);
+                String chatMsg = new String("Wave " + waveCounter + " is about to start...");
+                displayAction(chatMsg, 5);
                 break;
         }
     }

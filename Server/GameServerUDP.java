@@ -76,7 +76,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						System.out.println("[SERVER]: All players have readied up, starting game!");
 						startGameMessage();
 
-						beginWave();
+						spawnWave(1);
 					}
 				}
 			}
@@ -101,6 +101,11 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				readyStatus.remove(clientID); // remove disconnected player from ready map
 				curPositions.remove(clientID);
 				scores.remove(clientID);
+
+				if (curPositions.isEmpty()){
+					isGameOver = true;
+					sendGameOverMessage();
+				}
 			}
 			
 			// CREATE -- Case where server receives a create message (to specify avatar location)
@@ -220,6 +225,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			try {
 				String message = "gameOver";
 				sendPacketToAll(message);
+				System.out.println("[SERVER]: Game is OVER! There were no winners...");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -233,6 +239,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		try {
 			String message = "gameOver," + winnerUUID.toString() + "," + winnerScore;
 			sendPacketToAll(message);
+			System.out.println("[SERVER]: Game is OVER! Player " + winnerUUID.toString() + " won with a score of " + winnerScore + ".");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -250,13 +257,13 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			e.printStackTrace();
 		}
 	}
-	public void beginWave() {
+	public void spawnWave(int waveCount) {
 		isSpawning = true;
 		Random rn = new Random();
-		int genWave = rn.nextInt(7,12) * getClients().size();
+		int genWave = rn.nextInt(7+(waveCount % 5),12+waveCount) * curPositions.size();
 
 		try {
-			System.out.println("[SERVER]: First wave has start with " + genWave + " Zombies!");
+			System.out.println("[ GAME ]: Wave " + waveCount + " has start with " + genWave + " Zombies!");
 			for (int i = 0; i < genWave; i++){
 				sendCreateNPCmsg();
 			}
@@ -266,6 +273,14 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			System.out.println("couldnt start wave"); e.printStackTrace(); }
 		finally {
 			isSpawning = false;
+		}
+	}
+	public void sendSpawnWaveMsg(int waveCount){
+		try {
+			String msg = new String("waveMsg," + waveCount);
+			sendPacketToAll(msg);
+		} catch (IOException e) {
+			System.out.println("couldnt send waveMsg"); e.printStackTrace();
 		}
 	}
 	public boolean getIsSpawning(){
@@ -371,7 +386,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		try
 		{
 			NPC npc = npcCtrl.spawnNPC();
-			System.out.println("[SERVER]: Spawning an NPC at: X: "+ npc.getX() + " Y: " + npc.getY() + " Z: " + npc.getZ());
+			System.out.println("[ GAME ]: Spawning an NPC at: X: "+ npc.getX() + " Y: " + npc.getY() + " Z: " + npc.getZ());
 			String message = new String("createNPC," + npc.getID());
 			message += "," + npc.getX();
 			message += "," + npc.getY();
