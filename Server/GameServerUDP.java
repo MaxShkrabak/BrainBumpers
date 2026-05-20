@@ -13,6 +13,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	private static final int MIN_PLAYERS = 2;
 	private boolean gameStarted = false, isSpawning = false, isGameOver = false;
 	private HashMap<UUID, String[]> curPositions = new HashMap<>();
+	private HashMap<UUID, int[]> spawnOffsets = new HashMap<>();
 	HashMap<UUID, Boolean> readyStatus = new HashMap<>();
 	private HashMap<UUID, Integer> scores = new HashMap<>();
 
@@ -48,6 +49,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 						readyStatus.put(clientID, false); // Store the connected user in the hashmap
 						curPositions.put(clientID, new String[]{"0","0","0"});
 						scores.put(clientID, 0);
+						sendSpawnOffsetMessage(clientID);
 					}
 				} 
 				catch (IOException e) 
@@ -467,6 +469,31 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	catch (IOException e)
 	{	e.printStackTrace();
 	}	}
+
+	public void sendSpawnOffsetMessage(UUID clientID) {
+		try {
+			int playerIndex = curPositions.size() - 1;
+			int col = playerIndex % 4;
+			int row = playerIndex / 4;
+
+			int calcOffsetX = 2 * col;
+			int calcOffsetZ = -3 * row;
+
+			spawnOffsets.put(clientID, new int[]{calcOffsetX, calcOffsetZ});
+
+			String newPlayerMsg = "spawnOffset," + clientID + "," + calcOffsetX + "," + calcOffsetZ;
+			sendPacketToAll(newPlayerMsg);
+
+			for (Map.Entry<UUID, int[]> entry : spawnOffsets.entrySet()) {
+				if (entry.getKey().equals(clientID)) continue;
+				int[] offset = entry.getValue();
+				String existingMsg = "spawnOffset," + entry.getKey() + "," + offset[0] + "," + offset[1];
+				sendPacket(existingMsg, clientID);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	// Informs a client that a new avatar has joined the server with the unique identifier 
 	// remoteId. This message is intended to be send to all clients currently connected to 

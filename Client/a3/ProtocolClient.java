@@ -102,6 +102,18 @@ public class ProtocolClient extends GameConnectionClient
 				}
 			}
 
+			if (messageTokens[0].compareTo("spawnOffset") == 0)
+			{
+				UUID playerID = UUID.fromString(messageTokens[1]);
+				int offsetX = Integer.parseInt(messageTokens[2]);
+				int offsetZ = Integer.parseInt(messageTokens[3]);
+				if (game.isThisPlayer(playerID)){
+					game.offsetAvatar(offsetX, offsetZ);
+				} else {
+					ghostManager.offsetGhostAvatar(playerID, offsetX, offsetZ);
+				}
+			}
+
 			// Receive set new texture for a ghost from server
 			if (messageTokens[0].compareTo("setTex") == 0)
 			{

@@ -1051,6 +1051,24 @@ public class MyGame extends VariableFrameRateGame {
         if (protClient != null)
             protClient.processPackets();
     }
+    public boolean isThisPlayer(UUID id){
+        if (protClient != null){
+            return protClient.getID().equals(id);
+        }
+        return false;
+    }
+
+    protected void offsetAvatar(int x, int z){
+        Vector3f current = avatar.getWorldLocation();
+        Vector3f newPos = new Vector3f(current.x + x, current.y, current.z + z);
+        avatar.setLocalLocation(newPos);
+
+        if (avatar.getPhysicsObject() != null) {
+            Quaternionf rot = new Quaternionf();
+            avatar.getWorldRotation().getNormalizedRotation(rot);
+            avatar.getPhysicsObject().setTransform(newPos, rot);
+        }
+    }
 
     public Vector3f getPlayerPosition() { return avatar.getWorldLocation(); }
     public Matrix4f getPlayerRotation() { System.out.println(avatar.getWorldRotation()); return avatar.getWorldRotation();}

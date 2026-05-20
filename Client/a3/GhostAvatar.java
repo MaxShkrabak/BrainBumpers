@@ -95,6 +95,12 @@ public class GhostAvatar extends GameObject
 		}
 	}
 
+	public void addOffsetToPosition(int x, int z){
+		Vector3f updatedLoc = getWorldLocation();
+		updatedLoc.add(x, 0 ,z);
+		setLocalLocation(updatedLoc);
+	}
+
 	public UUID getID() { return uuid; }
 	public void setPosition(Vector3f m) { setLocalLocation(m); }
 	public void setRotation(float m) { globalYaw(m); }

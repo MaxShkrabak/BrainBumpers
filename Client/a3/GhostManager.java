@@ -1,6 +1,7 @@
 package a3;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.Vector;
@@ -15,6 +16,7 @@ public class GhostManager
 	private MyGame game;
 	private Vector<GhostAvatar> ghostAvatars = new Vector<GhostAvatar>();
 	private Vector<GhostNPC> ghostNPCs = new Vector<GhostNPC>();
+	private HashMap<UUID, int[]> pendingOffsets = new HashMap<>();
 	Random rn = new Random();
 
 	public GhostManager(VariableFrameRateGame vfrg)
@@ -96,7 +98,7 @@ public class GhostManager
 		return new Vector3f(npc.getWorldLocation());
 	}
 
-	
+
 	public void createGhostAvatar(UUID id, int tex, Vector3f position, Matrix4f rotation) throws IOException
 	{
 		if (findAvatar(id) != null) {
@@ -114,6 +116,12 @@ public class GhostManager
 		newAvatar.setLocalScale(initialScale);
 		newAvatar.setLocalRotation(rotation);
 		ghostAvatars.add(newAvatar);
+
+		if (pendingOffsets.containsKey(id)) {
+			int[] offset = pendingOffsets.get(id);
+			newAvatar.addOffsetToPosition(offset[0], offset[1]);
+			pendingOffsets.remove(id);
+		}
 
 		initializeAvatarPhysics(newAvatar);
 	}
@@ -169,7 +177,16 @@ public class GhostManager
 	public Vector<GhostAvatar> getGhostAvatars() {
 		return ghostAvatars;
 	}
-	
+
+	public void offsetGhostAvatar(UUID id, int offsetX, int offsetZ) {
+		GhostAvatar ghostAvatar = findAvatar(id);
+		if (ghostAvatar != null) {
+			ghostAvatar.addOffsetToPosition(offsetX, offsetZ);
+		} else {
+			// Ghost doesn't exist yet — store for when it's created
+			pendingOffsets.put(id, new int[]{offsetX, offsetZ});
+		}
+	}
 	public void updateGhostAvatarPosition(UUID id, Vector3f position)
 	{	GhostAvatar ghostAvatar = findAvatar(id);
 		if (ghostAvatar != null)
