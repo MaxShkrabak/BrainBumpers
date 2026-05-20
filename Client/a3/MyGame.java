@@ -65,7 +65,7 @@ public class MyGame extends VariableFrameRateGame {
     private PlayerHealth playerHealth = new PlayerHealth();
     private static final float KILL_SPEED_THRESHOLD = 5.0f;
 
-    private int score = 0, zombiesAlive=0;
+    private int score = 0, winnerScore = 0, zombiesAlive=0;
     private double lastFrameTime, currFrameTime, elapsTime;
     private boolean isGameStarted = false, isGameOver = false, isGameWon = false, isSpectating = false, showAxes = false, showPhysics = false;
     private boolean wasMoving = false;
@@ -580,7 +580,6 @@ public class MyGame extends VariableFrameRateGame {
 
             } else {
                 // Spectate mode — follow first alive ghost
-                boolean foundTarget = false;
                 for (GhostAvatar ghost : gm.getGhostAvatars()) {
                     if (ghost.getRenderStates().renderingEnabled()) {
                         Vector3f ghostPos = ghost.getWorldLocation();
@@ -590,16 +589,7 @@ public class MyGame extends VariableFrameRateGame {
                                 .add(0f, 5f, 0f);
                         engine.getRenderSystem().getViewport("LEFT").getCamera().setLocation(camPos);
                         engine.getRenderSystem().getViewport("LEFT").getCamera().lookAt(ghost);
-                        foundTarget = true;
                         break;
-                    }
-                }
-                if (!foundTarget) {
-                    if(!isGameOver){
-                        if(protClient.getCurrentTopScore() == protClient.getID()){
-                            isGameWon = true;
-                        }
-                        isGameOver = true;
                     }
                 }
             }
@@ -626,7 +616,11 @@ public class MyGame extends VariableFrameRateGame {
             if (isGameWon){
                 gameStatusMsg = "You WIN with a score of " + score + "!";
             } else {
-                gameStatusMsg = "GAME OVER! You lost...";
+                if (winnerScore > 0) {
+                    gameStatusMsg = "GAME OVER! Winner ended with " + winnerScore + " score.";
+                } else {
+                    gameStatusMsg = "GAME OVER! There are no winners...";
+                }
                 statusColor = new Vector3f(1, 0, 0);
             }
         } else if (isSpectating) {
@@ -664,7 +658,7 @@ public class MyGame extends VariableFrameRateGame {
         Vector3f actionColor = new Vector3f(1, 1, 1);
         (engine.getHUDmanager()).setHUD1(speedHud, timerColor, 20, height - 80);
         (engine.getHUDmanager()).setHUD2(scoreHud, scoreColor, 20, height - 40);
-        (engine.getHUDmanager()).setHUD3(gameStatusMsg, statusColor, width / 2, height - 50); // top middle of window
+        (engine.getHUDmanager()).setHUD3(gameStatusMsg, statusColor, (width / 2) - 65, height - 50); // top middle of window
         (engine.getHUDmanager()).setHUD4(actionMsg, actionColor, 20, height - 120);
 
         // mini viewport (bottom right)
@@ -1103,6 +1097,18 @@ public class MyGame extends VariableFrameRateGame {
         backRightTire.getRenderStates().disableRendering();
         frontLeftTire.getRenderStates().disableRendering();
         frontRightTire.getRenderStates().disableRendering();
+    }
+
+    protected void handleGameOver(UUID winnerID, int winnerScore){
+        isGameOver = true;
+        this.winnerScore = winnerScore;
+        if (protClient != null && protClient.getID().equals(winnerID)){
+            isGameWon = true;
+        }
+    }
+
+    protected void handleGameOver() {
+        isGameOver = true;
     }
 
     public PlayerHealth getPlayerHealth() { return playerHealth; }

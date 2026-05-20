@@ -179,6 +179,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				System.out.println("[SERVER]: Player " + clientID + " has died");
 				curPositions.remove(clientID);
 				sendPlayerDeadMessage(clientID);
+				if (curPositions.isEmpty()){
+					isGameOver = true;
+					sendGameOverMessage();
+				}
 			}
 
 		}	}
@@ -187,6 +191,48 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		try {
 			String message = new String("playerDead," + clientID.toString());
 			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public HashMap<UUID, Integer> getCurrentWinner() {
+		UUID topUUID = null;
+		int topScore = 1;
+
+		for (Map.Entry<UUID, Integer> entry : scores.entrySet()) {
+			if (entry.getValue() >= topScore) {
+				topScore = entry.getValue();
+				topUUID = entry.getKey();
+			}
+		}
+
+		HashMap<UUID, Integer> winner = new HashMap<>();
+		if (topUUID != null) {
+			winner.put(topUUID, topScore);
+		}
+		return winner;
+	}
+
+	public void sendGameOverMessage() {
+		HashMap<UUID, Integer> winner = getCurrentWinner();
+		if (winner.isEmpty()){
+			try {
+				String message = "gameOver";
+				sendPacketToAll(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+
+		Map.Entry<UUID, Integer> entry = winner.entrySet().iterator().next();
+		UUID winnerUUID = entry.getKey();
+		int winnerScore = entry.getValue();
+
+		try {
+			String message = "gameOver," + winnerUUID.toString() + "," + winnerScore;
+			sendPacketToAll(message);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
