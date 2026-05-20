@@ -633,7 +633,17 @@ public class MyGame extends VariableFrameRateGame {
             statusColor = new Vector3f(1,1,1);
             gameStatusMsg = "Spectating a player";
         } else {
-            gameStatusMsg = "Health: " + playerHealth.getCurrentHP() + " / " + playerHealth.getMaxHP();
+            if (isGameStarted) {
+                float hpPercent = playerHealth.getPercent();
+                if(hpPercent >= 0.75){
+                    statusColor = new Vector3f(0, 1, 0);
+                } else if (hpPercent >= .40){
+                    statusColor = new Vector3f(1, 1, 0);
+                } else {
+                    statusColor = new Vector3f(1, 0, 0);
+                }
+                gameStatusMsg = "Health: " + playerHealth.getCurrentHP() + " / " + playerHealth.getMaxHP();
+            }
         }
 
         // action message
